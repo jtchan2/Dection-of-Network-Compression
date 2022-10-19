@@ -14,6 +14,7 @@ int main(){
 	int sockfd;
 	char buffer[MAXLINE];
 	char *hello = "Hellow From client";
+	double timeRec;
 	struct sockaddr_in serveraddr;
 
 	if( (sockfd = socket (AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -37,6 +38,8 @@ int main(){
 
 	buffer [n] = '\0';
 	printf("Server : %s\n", buffer);
+	//n = recvfrom(sockfd, (double *) timeRec, sizeof(timeRec), MSG_WAITALL, (struct sockaddr *) &serveraddr, &len);
+	printf("Server : time to send %f\n", timeRec);
 	close(sockfd);
 	return 0;
 }

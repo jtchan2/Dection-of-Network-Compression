@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <time.h>
 
 
 #define PORT 8080
@@ -17,7 +18,7 @@ int main(){
 	char buffer[MAXLINE];
 	char *hello = "Hello from server";
 	struct sockaddr_in serveraddr, clientaddr;
-
+	clock_t t;
 	//CREATING UDP SOCKET
 	if( (sockfd = socket(AF_INET, SOCK_DGRAM, 0))<0){
 		perror("socket creation failed");
@@ -39,14 +40,18 @@ int main(){
 
 	int len, n;
 	len = sizeof(clientaddr);
-
+	printf("Starting TImer\n");
+	t = clock();
 	n= recvfrom(sockfd, (char *) buffer, MAXLINE, MSG_WAITALL, (struct sockaddr *) &clientaddr, &len);
-
+	t = clock()-t;
+	double time_taken = ((double)t)/CLOCKS_PER_SEC;
+	printf("time it took to recieve a packet was %f seconds \n", time_taken);
 	buffer[n] = '\0';
 	printf("Client : %s\n", buffer);
 	sendto(sockfd, (const char *)hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &clientaddr, len);
 	printf("Hello Message sent.\n");
+	double * send_time= &time_taken;
+	sendto(sockfd, (const double *) send_time, sizeof(send_time), MSG_CONFIRM, (const struct sockaddr *) &clientaddr, len);
 
-	
 	return 0;
 }
