@@ -25,7 +25,7 @@ int main(){
 	memset( &serveraddr, 0 ,sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port = htons(PORT);
-	serveraddr.sin_addr.s_addr = INADDR_ANY;
+	serveraddr.sin_addr.s_addr = inet_addr("192.168.86.248");
 
 	int n, len;
 

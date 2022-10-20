@@ -34,7 +34,7 @@ int main(){
 
 	//setting server info
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = INADDR_ANY;
+	serveraddr.sin_addr.s_addr = inet_addr("192.168.86.249");
 	serveraddr.sin_port = htons(PORT);
 
 	if ( bind(sockfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) <0){
