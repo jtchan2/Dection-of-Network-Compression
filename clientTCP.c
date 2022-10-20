@@ -34,7 +34,8 @@ int main (int agrc, char *argv[]){
 		perror("Failed to connect socket");
 		exit(EXIT_FAILURE);
 	}
-	bytes_sent = send(sockfd, msg, len, 0);
+	len = strlen(msg);
+	bytes_sent = send(sockfd, (char *) msg, len, 0);
 	close(sockfd);
 	return 0;
 

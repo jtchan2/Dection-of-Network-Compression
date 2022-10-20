@@ -31,7 +31,7 @@ int main (int argc, char *argv[]){
 	serveraddr.sin_addr.s_addr = inet_addr("192.168.86.248");
 	serveraddr.sin_port = htons(PORT);
 
-	if( bind(sockfd, (const struct sockaddr*)&serveraddr, sizeof(serveraddr))<0){
+	if( bind(sockfd, ( struct sockaddr*)&serveraddr, sizeof(serveraddr))<0){
 		perror("not able to bind socket");
 		exit(EXIT_FAILURE);
 	}
@@ -52,11 +52,12 @@ int main (int argc, char *argv[]){
 		printf("Error  accepting client");
 		return -1;
 	}
-	if(recv( new_fd, buffer, sizeof(buffer), 0) <0){
+	int n;
+	if((n= recv( new_fd, buffer, sizeof(buffer), 0)) <0){
 		printf("can not receive message\n");
 		return -1;
 	}
-
+	buffer[n]='\0';
 	printf("Message from Client: %s\n", buffer);
 	
 	
