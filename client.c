@@ -40,7 +40,11 @@ int main(){
 	printf("Server : %s\n", buffer);
 	//n = recvfrom(sockfd, (double *) timeRec, sizeof(timeRec), MSG_WAITALL, (struct sockaddr *) &serveraddr, &len);
 	//Can only use strings
+	n = recvfrom(sockfd, (char *) buffer, MAXLINE, MSG_WAITALL, (struct sockaddr *) &serveraddr, &len);
+	buffer[n] = '\0';
+	printf("Server : %s\n", buffer);
 	printf("Server : time to send %f\n", timeRec);
+	
 	close(sockfd);
 	return 0;
 }

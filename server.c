@@ -7,11 +7,15 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <time.h>
-
+#include <signal.h>
 
 #define PORT 8080
 #define MAXLINE 1024
 
+void catch_alarm (int sig_num){
+	printf("15 secons is now over\n");
+	
+}
 int main(){
 
 	int sockfd;
@@ -51,7 +55,12 @@ int main(){
 	sendto(sockfd, (const char *)hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &clientaddr, len);
 	printf("Hello Message sent.\n");
 	double * send_time= &time_taken;
-	sendto(sockfd, (const double *) send_time, sizeof(send_time), MSG_CONFIRM, (const struct sockaddr *) &clientaddr, len);
+	hello="Now I am 15 seconds late";
+	signal(SIGALRM, catch_alarm);
+	alarm(15);
+	alarm(0);
+	sleep(15);
+	sendto(sockfd, (const char *) hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &clientaddr, len);
 
 	return 0;
 }
