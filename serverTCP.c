@@ -47,6 +47,6 @@ int main (int argc, char *argv[]){
 
 	addr_size= sizeof(their_addr);
 	new_fd= accept(sockfd, ( struct sockaddr*)&their_addr, &addr_size);
-	//close(sockfd);
+	//close(sockfd); hello`
 	return 0;
 }
