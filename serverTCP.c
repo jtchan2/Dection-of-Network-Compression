@@ -17,6 +17,7 @@ int main (int argc, char *argv[]){
 	struct sockaddr_in serveraddr, clientaddr;
 	struct sockaddr_storage their_addr;
 	socklen_t addr_size;
+	char buffer[MAXLINE];
 
 	if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) <0){
 		perror("socket creation failed");
@@ -27,7 +28,7 @@ int main (int argc, char *argv[]){
 	memset(&clientaddr, 0, sizeof(clientaddr));
 
 	serveraddr.sin_family= AF_INET;
-	serveraddr.sin_addr.s_addr = INADDR_ANY;
+	serveraddr.sin_addr.s_addr = inet_addr("192.168.86.248");
 	serveraddr.sin_port = htons(PORT);
 
 	if( bind(sockfd, (const struct sockaddr*)&serveraddr, sizeof(serveraddr))<0){
@@ -47,6 +48,18 @@ int main (int argc, char *argv[]){
 
 	addr_size= sizeof(their_addr);
 	new_fd= accept(sockfd, ( struct sockaddr*)&their_addr, &addr_size);
-	//close(sockfd); hello`
+	if(new_fd < 0){
+		printf("Error  accepting client");
+		return -1;
+	}
+	if(recv( new_fd, buffer, sizeof(buffer), 0) <0){
+		printf("can not receive message\n");
+		return -1;
+	}
+
+	printf("Message from Client: %s\n", buffer);
+	
+	
+	close(sockfd);
 	return 0;
 }
