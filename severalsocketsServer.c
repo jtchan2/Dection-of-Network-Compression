@@ -6,10 +6,13 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <string.h>
+#include <time.h>
 
 int main (int argc, char *argv[]){
 	int preprobe_socket;
 
+	printf("Starting Pre Probing TCP phase\n");
 	if( (preprobe_socket= socket(AF_INET, SOCK_STREAM, 0))<0){
 		perror("Unable to create pre probing Socket");
 		exit(EXIT_FAILURE);
@@ -17,6 +20,7 @@ int main (int argc, char *argv[]){
 	int port = 8765;
 	char * ip= "192.168.86.248";
 	struct sockaddr_in serveraddr;
+	
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port= htons(port);
 	serveraddr.sin_addr.s_addr = inet_addr(ip);
@@ -45,9 +49,58 @@ int main (int argc, char *argv[]){
 	}
 	msg[n]='\0';
 	printf("CLient has sent : %s\n", msg);
-
+	printf("Ending Pre Probing TCP phase");
 	close(ppclient_socket);
 	close(preprobe_socket);
+
+	printf("Starting Probing UDP phase");
+
+	int sockUDP;
+	struct sockaddr_in clientaddrUDP;
+
+	if( (sockUDP= socket(AF_INET, SOCK_DGRAM, 0))<0){
+		perror("Unable to create UDP socket");
+		exit(EXIT_FAILURE);
+	}
+
+	if ( bind(sockUDP, (const struct sockaddr *) &serveraddr, sizeof(serveraddr))< 0){
+		perror("Not able to bind UDP socket");
+		exit(EXIT_FAILURE);
+	}
+
+	clock_t timer;
+	char gainer[256];
+	int len= sizeof(clientaddrUDP);
+	timer = clock();
+	n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
+	timer = clock()-timer;
+	double time_taken = ((double)timer)/CLOCKS_PER_SEC;
+	if(n<0){
+		perror("Unable to recive packets UDP style");
+		exit(EXIT_FAILURE);
+	}
+	gainer[n] = '\0';
+	printf("Server Recieved : %s\n", gainer);
+	printf("Recieving 'high entropy data/packets' after a short break\n");
+	sleep(15);
+
+	printf("Now Recieve 'high entropy dat packets'\n");
+	clock_t timer2;
+	timer2=clock();
+
+	n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
+	if(n<0){
+		perror(" Unable to recieve high entropy packets UDP style");
+		exit(EXIT_FAILURE);
+	}
+	
+	timer2= clock()-timer;
+	double time_taken2= ((double)timer)/CLOCKS_PER_SEC;
+	gainer[n] = '\0';
+	printf("Server Recieved High data : %s\n", gainer);
+
+	printf("Probing UDP phase ending");
+	close(sockUDP);
 
 	return 0;
 
