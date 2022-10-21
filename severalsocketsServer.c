@@ -80,7 +80,7 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	gainer[n] = '\0';
-	printf("Server Recieved : %s\n", gainer);
+	printf("Server Recieved : %s, time: %f\n", gainer, time_taken);
 	printf("Recieving 'high entropy data/packets' after a short break\n");
 	sleep(15);
 
@@ -97,10 +97,15 @@ int main (int argc, char *argv[]){
 	timer2= clock()-timer;
 	double time_taken2= ((double)timer)/CLOCKS_PER_SEC;
 	gainer[n] = '\0';
-	printf("Server Recieved High data : %s\n", gainer);
+	printf("Server Recieved High data : %s, time taken: %f\n", gainer,time_taken2);
 
-	printf("Probing UDP phase ending");
+	printf("Probing UDP phase ending\n");
 	close(sockUDP);
+
+	double time_overall = (time_taken2 - time_taken)*1000;
+	char  mille[1000];
+	sprintf(mille, "%f", time_overall);
+	printf("Time difference is %s ms\n", mille);
 
 	return 0;
 
