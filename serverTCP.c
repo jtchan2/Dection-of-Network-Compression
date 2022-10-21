@@ -8,7 +8,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-#define PORT 8080
+#define PORT 8765
 #define MAXLINE 1024
 #define BACKLOG 10
 
@@ -60,7 +60,7 @@ int main (int argc, char *argv[]){
 	buffer[n]='\0';
 	printf("Message from Client: %s\n", buffer);
 	
-	
+	close(new_fd);
 	close(sockfd);
 	return 0;
 }

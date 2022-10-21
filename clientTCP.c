@@ -8,7 +8,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-#define PORT 8080
+#define PORT 8765
 #define MAXLINE 1024
 #define BACKLOG 10
 
