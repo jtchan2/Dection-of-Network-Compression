@@ -57,8 +57,6 @@ int main(){
 	double * send_time= &time_taken;
 	hello="Now I am 15 seconds late";
 	signal(SIGALRM, catch_alarm);
-	alarm(15);
-	alarm(0);
 	sleep(15);
 	sendto(sockfd, (const char *) hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &clientaddr, len);
 
