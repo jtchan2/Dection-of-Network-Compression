@@ -72,13 +72,15 @@ int main (int argc, char *argv[]){
 	char gainer[256];
 	int len= sizeof(clientaddrUDP);
 	timer = clock();
-	n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
+	for(int i=0; i<6000; i++){
+		n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
+		if(n<0){
+	                perror("Unable to recive packets UDP style");
+        	        exit(EXIT_FAILURE);
+	       	}
+	}
 	timer = clock()-timer;
 	double time_taken = ((double)timer)/CLOCKS_PER_SEC;
-	if(n<0){
-		perror("Unable to recive packets UDP style");
-		exit(EXIT_FAILURE);
-	}
 	gainer[n] = '\0';
 	printf("Server Recieved : %s, time: %f\n", gainer, time_taken);
 	printf("Recieving 'high entropy data/packets' after a short break\n");
@@ -87,11 +89,12 @@ int main (int argc, char *argv[]){
 	printf("Now Recieve 'high entropy dat packets'\n");
 	clock_t timer2;
 	timer2=clock();
-
-	n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
-	if(n<0){
-		perror(" Unable to recieve high entropy packets UDP style");
-		exit(EXIT_FAILURE);
+	for(int i=0; i<6000; i++){
+		n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
+		if(n<0){
+			perror(" Unable to recieve high entropy packets UDP style");
+			exit(EXIT_FAILURE);
+		}
 	}
 	
 	timer2= clock()-timer;

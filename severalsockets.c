@@ -48,16 +48,18 @@ int main(int argc, char *argv[]){
 
 	char * packet= "Packet";
 
-	sendto(sockUDP, (const char *)packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
-
+	for( int i=0; i<6000; i++){
+		sendto(sockUDP, (const char *)packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+	}
 	printf("packet sent\n");
 
 	printf("Pausing to split UDP low to high entropy 'data'\n");
-//	sleep(15);
+	sleep(15);
 	printf("Now Sending high entropy data\n");
 
-	sendto(sockUDP, (const char *) packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
-
+	for(int i=0; i<6000; i++){
+		sendto(sockUDP, (const char *) packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
 	close(sockUDP);
@@ -71,6 +73,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
+	sleep(10);
 	if( connect(postprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("COUKD NOT CONNECT POST PROBE TCP SOCKET");
 		exit(EXIT_FAILURE);
