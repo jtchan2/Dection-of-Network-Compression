@@ -20,7 +20,7 @@ int main (int argc, char *argv[]){
 	int port = 8765;
 	char * ip= "192.168.86.248";
 	struct sockaddr_in serveraddr;
-	
+	memset(&serveraddr, 0, sizeof(serveraddr));	
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port= htons(port);
 	serveraddr.sin_addr.s_addr = inet_addr(ip);
@@ -49,11 +49,11 @@ int main (int argc, char *argv[]){
 	}
 	msg[n]='\0';
 	printf("CLient has sent : %s\n", msg);
-	printf("Ending Pre Probing TCP phase");
+	printf("Ending Pre Probing TCP phase\n");
 	close(ppclient_socket);
 	close(preprobe_socket);
 
-	printf("Starting Probing UDP phase");
+	printf("Starting Probing UDP phase\n");
 
 	int sockUDP;
 	struct sockaddr_in clientaddrUDP;
@@ -82,7 +82,7 @@ int main (int argc, char *argv[]){
 	gainer[n] = '\0';
 	printf("Server Recieved : %s, time: %f\n", gainer, time_taken);
 	printf("Recieving 'high entropy data/packets' after a short break\n");
-	sleep(15);
+	//sleep(15);
 
 	printf("Now Recieve 'high entropy dat packets'\n");
 	clock_t timer2;
@@ -101,12 +101,44 @@ int main (int argc, char *argv[]){
 
 	printf("Probing UDP phase ending\n");
 	close(sockUDP);
-
 	double time_overall = (time_taken2 - time_taken)*1000;
 	char  mille[1000];
 	sprintf(mille, "%f", time_overall);
 	printf("Time difference is %s ms\n", mille);
+	
 
+	printf("Starting Post probing phase TCP\n");
+
+	int post_sock;
+
+	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
+		perror("Unable to connect Post Probing TCP socket");
+		exit(EXIT_FAILURE);
+	}
+
+	if( bind(post_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
+		perror("Unable to Bind Post probing TCP");
+		exit(EXIT_FAILURE);
+	}
+
+	if(listen(post_sock, 5)<0){
+		perror("Not able to listen for Post Probing Phase TCP");
+		exit(EXIT_FAILURE);
+	}
+
+	int client_sockPost;
+	//may need to add new client_addr and addr_size
+	if(client_sockPost= accept(post_sock, (struct sockaddr*) &client_addr, &addr_size)<0){
+		perror("Not able to Accept for Post Probing pahse TCP");
+		exit(EXIT_FAILURE);
+	}
+
+	send(post_sock, (char *)mille, sizeof(mille), 0);
+	printf("Sent Client time results\n");
+	printf("ending post probing phase\n");
+	close(post_sock);
+
+	
 	return 0;
 
 
