@@ -19,14 +19,14 @@ int main (int argc, char *argv[]){
 	}
 	int port = 8765;
 	char * ip= "192.168.86.248";
-	struct sockaddr_in preserveraddr;
+	struct sockaddr_in serveraddr;
 
 	port = 8080;
-	//memset(&serveraddr, 0, sizeof(serveraddr));	
-	preserveraddr.sin_family = AF_INET;
-	preserveraddr.sin_port= htons(port);
-	preserveraddr.sin_addr.s_addr = inet_addr(ip);
-	if( bind(preprobe_socket, (struct sockaddr*) &preserveraddr, sizeof(preserveraddr))<0){
+	memset(&serveraddr, 0, sizeof(serveraddr));	
+	serveraddr.sin_family = AF_INET;
+	serveraddr.sin_port= htons(port);
+	serveraddr.sin_addr.s_addr = inet_addr(ip);
+	if( bind(preprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("Unable to bind pre probing socket");
 		exit(EXIT_FAILURE);
 	}
@@ -58,22 +58,16 @@ int main (int argc, char *argv[]){
 
 	// socket to be used for UDp packet sending
 	int sockUDP;
-	struct sockaddr_in clientaddrUDP, serveraddrUDP;
+	struct sockaddr_in clientaddrUDP;
 	port = 8765;
 
-	serveraddrUDP.sin_family = AF_INET;
-	serveraddrUDP.sin_addr.s_addr=inet_addr(ip);
-	serveraddrUDP.sin_port= htons(port);
+	serveraddr.sin_port= htons(port);
 	if( (sockUDP= socket(AF_INET, SOCK_DGRAM, 0))<0){
 		perror("Unable to create UDP socket");
 		exit(EXIT_FAILURE);
 	}
 	printf("created UDP socket\n");
-
-	int frag =1;
-	setsockopt(sockUDP, SOL_SOCKET, IPV6_DONTFRAG, &frag, sizeof(frag));
-
-	if ( bind(sockUDP, (const struct sockaddr *) &serveraddrUDP, sizeof(serveraddrUDP))< 0){
+	if ( bind(sockUDP, (const struct sockaddr *) &serveraddr, sizeof(serveraddr))< 0){
 		perror("Not able to bind UDP socket");
 		exit(EXIT_FAILURE);
 	}
@@ -87,7 +81,7 @@ int main (int argc, char *argv[]){
 	timer = clock();
 	for(int i=0; i<6000; i++){
 		n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
-		
+		/*
 		if(n<0){
 	                perror("Unable to recive packets UDP style");
         	        exit(EXIT_FAILURE);
@@ -96,7 +90,7 @@ int main (int argc, char *argv[]){
 			perror("SOCKET CLOSED BOFRE ALL DATA SENT");
 			exit(EXIT_FAILURE);
 		}
-		
+		*/
 	}
 	timer = clock()-timer;
 	double time_taken = ((double)timer)/CLOCKS_PER_SEC;
@@ -112,13 +106,13 @@ int main (int argc, char *argv[]){
 	clock_t timer2;
 	timer2=clock();
 	for(int i=0; i<6000; i++){
-		n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) &clientaddrUDP, &len);
-		
+		n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
+		/*
 		if(n<0){
 			perror(" Unable to recieve high entropy packets UDP style");
 			exit(EXIT_FAILURE);
 		}
-		
+		*/
 	}
 	
 	timer2= clock()-timer;
@@ -146,12 +140,9 @@ int main (int argc, char *argv[]){
 	printf("Starting Post probing phase TCP\n");
 
 	int post_sock;
-	struct sockaddr_in postserveraddr;
 
 	port=8080;
-	postserveraddr.sin_family= AF_INET;
-	postserveraddr.sin_addr.s_addr = inet_addr(ip);
-	postserveraddr.sin_port= htons(port);
+	serveraddr.sin_port= htons(port);
 
 
 	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
@@ -162,7 +153,7 @@ int main (int argc, char *argv[]){
 	int yes =1;
         setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
-	if( bind(post_sock, (struct sockaddr*) &postserveraddr, sizeof(postserveraddr))<0){
+	if( bind(post_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("Unable to Bind Post probing TCP");
 		exit(EXIT_FAILURE);
 	}

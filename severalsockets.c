@@ -20,15 +20,15 @@ int main(int argc, char *argv[]){
 	}
 	int port = 8765;
 	char * ip= "192.168.86.248";
-	struct sockaddr_in preserveraddr;
+	struct sockaddr_in serveraddr;
 	port = 8080;
 
-	//memset(&serveraddr, 0, sizeof(serveraddr));
-	preserveraddr.sin_family = AF_INET;
-	preserveraddr.sin_port=htons(port);
-	preserveraddr.sin_addr.s_addr= inet_addr(ip);
+	memset(&serveraddr, 0, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	serveraddr.sin_port=htons(port);
+	serveraddr.sin_addr.s_addr= inet_addr(ip);
 
-	int status = connect(preprobe_socket, (struct sockaddr*)&preserveraddr, sizeof(preserveraddr));
+	int status = connect(preprobe_socket, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	if(status <0){
 		perror("Unable to connect to server");
 		exit(EXIT_FAILURE);
@@ -42,20 +42,8 @@ int main(int argc, char *argv[]){
 	printf("starting UDP probing Phase\n");
 
 	int sockUDP;
-	port = 8765;
-	
-
-	struct sockaddr_in serveraddrUDP, clientaddrUDP;
-
-	serveraddrUDP.sin_family = AF_INET;
-	serveraddrUDP.sin_addr.s_addr = inet_addr(ip);
-	serveraddrUDP.sin_port= htons(port);
-
 	port = 9876;
-
-	clientaddrUDP.sin_family = AF_INET;
-	clientaddrUDP.sin_addr.s_addr = inet_addr(ip);
-	clientaddrUDP.sin_port = htons(port);
+	serveraddr.sin_port= htons(port);
 
 	if( (sockUDP = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
 		perror("Unable to create Probing UDP socket");
@@ -63,16 +51,11 @@ int main(int argc, char *argv[]){
 	}
 
 	//bind sockUDP to port 9876	
-	
-	if(bind(sockUDP, (struct sockaddr*)&clientaddrUDP, sizeof(clientaddrUDP))<0){
-		perror("Could not bind UDP socket to port 9876");
-		exit(EXIT_FAILURE);
-	}
 
 	char * packet= "Packet";
 
 	for( int i=0; i<6000; i++){
-		sendto(sockUDP, (const char *)packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddrUDP, sizeof(serveraddrUDP));
+		sendto(sockUDP, (const char *)packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
 	}
 	printf("packet sent\n");
 
@@ -81,7 +64,7 @@ int main(int argc, char *argv[]){
 	printf("Now Sending high entropy data\n");
 
 	for(int i=0; i<6000; i++){
-		sendto(sockUDP, (const char *) packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddrUDP, sizeof(serveraddrUDP));
+		sendto(sockUDP, (const char *) packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
@@ -93,10 +76,7 @@ int main(int argc, char *argv[]){
 	int postprobe_socket;
 
 	port = 8080;
-	struct sockaddr_in postserveraddr;
-	postserveraddr.sin_family = AF_INET;
-	postserveraddr.sin_addr.s_addr=inet_addr(ip);
-	postserveraddr.sin_port= htons(port);
+	serveraddr.sin_port= htons(port);
 	if( (postprobe_socket = socket (AF_INET, SOCK_STREAM, 0))<0){
 		perror("COULD NOT CREATE POST PROBE PHASE SOCKET TCP");
 		exit(EXIT_FAILURE);
@@ -109,7 +89,7 @@ int main(int argc, char *argv[]){
 	setsockopt(postprobe_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 	*/
 	int PostprobeServer_sock;
-	if( connect(postprobe_socket, (struct sockaddr*) &postserveraddr, sizeof(postserveraddr))<0){
+	if( connect(postprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("COUKD NOT CONNECT POST PROBE TCP SOCKET");
 		exit(EXIT_FAILURE);
 	}
