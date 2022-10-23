@@ -142,7 +142,10 @@ int main (int argc, char *argv[]){
 	int post_sock;
 
 	port=8080;
-	serveraddr.sin_port= htons(port);
+	struct sockaddr_in postserveraddr;
+	postserveraddr.sin_family= AF_INET;
+	postserveraddr.sin_port= htons(port);
+	postserveraddr.sin_addr.s_addr= inet_addr(ip);
 
 
 	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
@@ -153,7 +156,7 @@ int main (int argc, char *argv[]){
 	int yes =1;
         setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
-	if( bind(post_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
+	if( bind(post_sock, (struct sockaddr*) &postserveraddr, sizeof(postserveraddr))<0){
 		perror("Unable to Bind Post probing TCP");
 		exit(EXIT_FAILURE);
 	}
