@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	//bind sockUDP to port 9876	
+	//TODO Create actual packts to be sent not a message
 
 	char * packet= "Packet";
 
