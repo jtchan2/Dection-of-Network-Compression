@@ -20,11 +20,12 @@ int main (int argc, char *argv[]){
 	int port = 8765;
 	char * ip= "192.168.86.248";
 	struct sockaddr_in serveraddr;
+
+	port = 8080;
 	memset(&serveraddr, 0, sizeof(serveraddr));	
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port= htons(port);
 	serveraddr.sin_addr.s_addr = inet_addr(ip);
-
 	if( bind(preprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("Unable to bind pre probing socket");
 		exit(EXIT_FAILURE);
@@ -58,7 +59,9 @@ int main (int argc, char *argv[]){
 	// socket to be used for UDp packet sending
 	int sockUDP;
 	struct sockaddr_in clientaddrUDP;
+	port = 8765;
 
+	serveraddr.sin_port= htons(port);
 	if( (sockUDP= socket(AF_INET, SOCK_DGRAM, 0))<0){
 		perror("Unable to create UDP socket");
 		exit(EXIT_FAILURE);
@@ -135,6 +138,10 @@ int main (int argc, char *argv[]){
 	printf("Starting Post probing phase TCP\n");
 
 	int post_sock;
+
+	port=8080;
+	serveraddr.sin_port= htons(port);
+
 
 	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
 		perror("Unable to connect Post Probing TCP socket");

@@ -21,6 +21,7 @@ int main(int argc, char *argv[]){
 	int port = 8765;
 	char * ip= "192.168.86.248";
 	struct sockaddr_in serveraddr;
+	port = 8080;
 
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
@@ -41,6 +42,9 @@ int main(int argc, char *argv[]){
 	printf("starting UDP probing Phase\n");
 
 	int sockUDP;
+	port = 8765;
+	serveraddr.sin_port= htons(port);
+
 	if( (sockUDP = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
 		perror("Unable to create Probing UDP socket");
 		exit(EXIT_FAILURE);
@@ -69,6 +73,8 @@ int main(int argc, char *argv[]){
 
 	int postprobe_socket;
 
+	port = 8080;
+	serveraddr.sin_port= htons(port);
 	if( (postprobe_socket = socket (AF_INET, SOCK_STREAM, 0))<0){
 		perror("COULD NOT CREATE POST PROBE PHASE SOCKET TCP");
 		exit(EXIT_FAILURE);
