@@ -105,7 +105,7 @@ int main (int argc, char *argv[]){
 	printf("Probing UDP phase ending\n");
 	close(sockUDP);
 	double time_overall = (time_taken2 - time_taken)*1000;
-	char  mille[1000];
+	char  mille[256];
 	sprintf(mille, "%f", time_overall);
 	printf("Time difference is %s ms\n", mille);
 	
@@ -136,6 +136,7 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
+	printf("Message sent : %s\n", mille);
 	send(post_sock, (char *)mille, sizeof(mille), 0);
 	printf("Sent Client time results\n");
 	printf("ending post probing phase\n");
