@@ -42,11 +42,26 @@ int main(int argc, char *argv[]){
 	printf("starting UDP probing Phase\n");
 
 	int sockUDP;
-	port = 9876;
+	port = 8765;
 	serveraddr.sin_port= htons(port);
 
 	if( (sockUDP = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
 		perror("Unable to create Probing UDP socket");
+		exit(EXIT_FAILURE);
+	}
+
+	//attempting to chagne binding port of client
+	struct sockaddr_in server_address, client_address;
+	server_address.sin_family= AF_INET;
+	server_address.sin_port = htons(port);
+	server_address.sin_addr.s_addr = inet_addr(ip);
+
+	client_address.sin_family= AF_INET;
+	client_address.sin_port = htons(9876);
+	client_address.sin_addr.s_addr = inet_addr("192.168.86.249");
+
+	if(bind(sockUDP, (struct sockaddr *) &client_address, sizeof(client_address))<0){
+		perror("Unable to Bind UDP socket");
 		exit(EXIT_FAILURE);
 	}
 
@@ -55,7 +70,7 @@ int main(int argc, char *argv[]){
 	char * packet= "Packet";
 
 	for( int i=0; i<6000; i++){
-		sendto(sockUDP, (const char *)packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+		sendto(sockUDP, (const char *)packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 	}
 	printf("packet sent\n");
 
@@ -64,7 +79,7 @@ int main(int argc, char *argv[]){
 	printf("Now Sending high entropy data\n");
 
 	for(int i=0; i<6000; i++){
-		sendto(sockUDP, (const char *) packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+		sendto(sockUDP, (const char *) packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
