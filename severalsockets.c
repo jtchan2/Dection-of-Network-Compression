@@ -75,12 +75,13 @@ int main(int argc, char *argv[]){
 	}
 
 	sleep(10);
+
 	/*
 	int yes =1;
 	setsockopt(postprobe_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 	*/
 	int PostprobeServer_sock;
-	if( (PostprobeServer_sock=connect(postprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr)))<0){
+	if( connect(postprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("COUKD NOT CONNECT POST PROBE TCP SOCKET");
 		exit(EXIT_FAILURE);
 	}
