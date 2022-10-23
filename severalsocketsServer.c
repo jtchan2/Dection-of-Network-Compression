@@ -62,11 +62,12 @@ int main (int argc, char *argv[]){
 		perror("Unable to create UDP socket");
 		exit(EXIT_FAILURE);
 	}
-
+	printf("created UDP socket\n");
 	if ( bind(sockUDP, (const struct sockaddr *) &serveraddr, sizeof(serveraddr))< 0){
 		perror("Not able to bind UDP socket");
 		exit(EXIT_FAILURE);
 	}
+	printf("Binded Socket\n");
 
 	clock_t timer;
 	char gainer[256];
@@ -78,6 +79,10 @@ int main (int argc, char *argv[]){
 	                perror("Unable to recive packets UDP style");
         	        exit(EXIT_FAILURE);
 	       	}
+		if(n==0){
+			perror("SOCKET CLOSED BOFRE ALL DATA SENT");
+			exit(EXIT_FAILURE);
+		}
 	}
 	timer = clock()-timer;
 	double time_taken = ((double)timer)/CLOCKS_PER_SEC;
@@ -136,8 +141,12 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	printf("Message sent : %s\n", mille);
-	send(post_sock, (char *)mille, sizeof(mille), 0);
+	char * letter ="Was this sent?";
+	printf("Message sent : %s\n", letter);
+	send(post_sock, (char *)letter, strlen(letter), 0);
+	if(sent<1){
+		printf("Nothing was sent\n");
+	}
 	printf("Sent Client time results\n");
 	printf("ending post probing phase\n");
 	close(post_sock);
