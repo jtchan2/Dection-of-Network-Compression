@@ -62,7 +62,8 @@ int main(int argc, char *argv[]){
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
-	close(sockUDP);
+	//close(sockUDP);
+	shutdown(sockUDP, 1);
 	
 	printf("starting post probe TCP\n");
 

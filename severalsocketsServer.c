@@ -143,8 +143,9 @@ int main (int argc, char *argv[]){
 
 	char * letter ="Was this sent?";
 	printf("Message sent : %s\n", letter);
-	send(post_sock, (char *)letter, strlen(letter), 0);
-	if(sent<1){
+	int bytes;
+	bytes =send(post_sock, (char *)letter, strlen(letter), 0);
+	if(bytes<1){
 		printf("Nothing was sent\n");
 	}
 	printf("Sent Client time results\n");
