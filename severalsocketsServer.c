@@ -124,6 +124,9 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
+	int yes =1;
+        setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+
 	if( bind(post_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("Unable to Bind Post probing TCP");
 		exit(EXIT_FAILURE);

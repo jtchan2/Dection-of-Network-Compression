@@ -75,12 +75,17 @@ int main(int argc, char *argv[]){
 	}
 
 	sleep(10);
-	if( connect(postprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
+	/*
+	int yes =1;
+	setsockopt(postprobe_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+	*/
+	int PostprobeServer_sock;
+	if( connect(PostprobeServer_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("COUKD NOT CONNECT POST PROBE TCP SOCKET");
 		exit(EXIT_FAILURE);
 	}
 
-	int PostprobeServer_sock;
+	//int PostprobeServer_sock;
 	char timed[256];
 	int n;
 	if( (n=recv(postprobe_socket,&timed, sizeof(timed), 0)) <0){
@@ -92,6 +97,7 @@ int main(int argc, char *argv[]){
 
 	printf("ENDING TCP POST PROBE CONNECTION\n");
 	close(postprobe_socket);
+	close(PostprobeServer_sock);
 		
 	return 0;
 }
