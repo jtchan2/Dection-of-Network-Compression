@@ -75,6 +75,8 @@ int main (int argc, char *argv[]){
 
 	clock_t timer;
 	char gainer[256];
+
+	//bind client addrUDP to a different port= 9876
 	int len= sizeof(clientaddrUDP);
 	timer = clock();
 	for(int i=0; i<6000; i++){

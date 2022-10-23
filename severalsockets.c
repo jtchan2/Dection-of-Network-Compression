@@ -42,13 +42,15 @@ int main(int argc, char *argv[]){
 	printf("starting UDP probing Phase\n");
 
 	int sockUDP;
-	port = 8765;
+	port = 9876;
 	serveraddr.sin_port= htons(port);
 
 	if( (sockUDP = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
 		perror("Unable to create Probing UDP socket");
 		exit(EXIT_FAILURE);
 	}
+
+	//bind sockUDP to port 9876	
 
 	char * packet= "Packet";
 
