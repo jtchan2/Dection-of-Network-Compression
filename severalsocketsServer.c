@@ -58,16 +58,24 @@ int main (int argc, char *argv[]){
 
 	// socket to be used for UDp packet sending
 	int sockUDP;
-	struct sockaddr_in clientaddrUDP;
+	struct sockaddr_in serveraddrUDP, clientaddrUDP;
 	port = 8765;
+	serveraddrUDP.sin_family = AF_INET;
+	serveraddrUDP.sin_port= htons(port);
+	serveraddrUDP.sin_addr.s_addr=inet_addr(ip);
 
-	serveraddr.sin_port= htons(port);
+
 	if( (sockUDP= socket(AF_INET, SOCK_DGRAM, 0))<0){
 		perror("Unable to create UDP socket");
 		exit(EXIT_FAILURE);
 	}
+
+	int frag =1;
+
+//	setsockopt(sockUDP, SOL_SOCKET, IPV6_DONTFRAG, &frag, sizeof(frag));
+	
 	printf("created UDP socket\n");
-	if ( bind(sockUDP, (const struct sockaddr *) &serveraddr, sizeof(serveraddr))< 0){
+	if ( bind(sockUDP, (const struct sockaddr *) &serveraddrUDP, sizeof(serveraddrUDP))< 0){
 		perror("Not able to bind UDP socket");
 		exit(EXIT_FAILURE);
 	}
@@ -115,8 +123,8 @@ int main (int argc, char *argv[]){
 		*/
 	}
 	
-	timer2= clock()-timer;
-	double time_taken2= ((double)timer)/CLOCKS_PER_SEC;
+	timer2= clock()-timer2;
+	double time_taken2= ((double)timer2)/CLOCKS_PER_SEC;
 	/*
 	gainer[n] = '\0';
 	printf("Server Recieved High data : %s, time taken: %f\n", gainer,time_taken2);
