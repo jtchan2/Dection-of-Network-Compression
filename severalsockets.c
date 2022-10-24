@@ -159,7 +159,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	sleep(10);
+	//sleep(10);
 
 	/*
 	int yes =1;
