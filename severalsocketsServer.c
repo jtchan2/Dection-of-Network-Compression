@@ -62,6 +62,9 @@ int main (int argc, char *argv[]){
 	// socket to be used for UDp packet sending
 	int sockUDP;
 	struct sockaddr_in serveraddrUDP, clientaddrUDP;
+	
+	memset(&serveraddrUDP, 0, sizeof(serveraddrUDP));
+	memset(&clientaddrUDP, 0, sizeof(clientaddrUDP));
 	port = 8765;
 	serveraddrUDP.sin_family = AF_INET;
 	serveraddrUDP.sin_port= htons(port);
