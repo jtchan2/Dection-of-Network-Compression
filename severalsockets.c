@@ -10,7 +10,7 @@
 
 struct packet {
 	
-}
+};
 int main(int argc, char *argv[]){
 	printf("Start Pre-probing TCP phase\n");
 	int preprobe_socket;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]){
 	printf("packet sent\n");
 
 	printf("Pausing to split UDP low to high entropy 'data'\n");
-	sleep(pause);i
+	sleep(pause);
 	printf("Now Sending high entropy data\n");
 
 	for(int i=0; i<num_of_packets; i++){
