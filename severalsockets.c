@@ -8,9 +8,6 @@
 #include <unistd.h>
 #include <string.h>
 
-struct packet {
-	
-};
 int main(int argc, char *argv[]){
 	printf("Start Pre-probing TCP phase\n");
 	int preprobe_socket;
@@ -18,6 +15,11 @@ int main(int argc, char *argv[]){
 	int size_payload=1000;
 	int pause=15;
 
+
+	struct packet{
+		int length;
+		char bytes[size_payload];
+	};
 	char msg[256] = "config file";
 
 	if( (preprobe_socket = socket(AF_INET, SOCK_STREAM, 0))<0){
@@ -73,10 +75,57 @@ int main(int argc, char *argv[]){
 
 	//TODO Create actual packts to be sent not a message
 
+	struct packet *low_entropy = (struct packet *) malloc (num_of_packets * sizeof(struct packet));
+
+	struct packet *high_entropy = (struct packet *)malloc (num_of_packets * sizeof(struct packet));
+
+	unsigned short id;
+	for(int i=0; i<num_of_packets; i++){
+		low_entropy[i].length= size_payload;
+		for( int j=0; j< (size_payload -2); j++){
+			low_entropy[i].bytes[j]=0;
+		}
+
+		id = i;
+		char packid[50];
+		sprintf(packid, "%d", id);
+
+		char * payload = (char *) malloc(strlen(low_entropy[i].bytes)+ strlen(packid)+1);
+
+		strcpy(payload, packid);
+		
+		strcat(payload, low_entropy[i].bytes);
+		strcpy(low_entropy[i].bytes, payload);
+		//strcpy(low_entropy[i].bytes, conversion);
+	}
+
+
+	//high entropy packet making
+	
+	for(int i=0; i<num_of_packets; i++){
+                high_entropy[i].length= size_payload;
+                for( int j=0; j< (size_payload -2); j++){
+                        high_entropy[i].bytes[j]=0;
+                }
+
+                id = i;
+                char packid[50];
+                sprintf(packid, "%d", id);
+
+                char * payload = (char *) malloc(strlen(high_entropy[i].bytes)+ strlen(packid)+1);
+
+                strcpy(payload, packid);
+
+                strcat(payload, high_entropy[i].bytes);
+                strcpy(high_entropy[i].bytes, payload);
+                //strcpy(high_entropy[i].bytes, conversion);
+        }
+
+
 	char * packet= "Packet";
 
 	for( int i=0; i<num_of_packets; i++){
-		sendto(sockUDP, (const char *)packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 	}
 	printf("packet sent\n");
 
@@ -85,7 +134,7 @@ int main(int argc, char *argv[]){
 	printf("Now Sending high entropy data\n");
 
 	for(int i=0; i<num_of_packets; i++){
-		sendto(sockUDP, (const char *) packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+		sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");

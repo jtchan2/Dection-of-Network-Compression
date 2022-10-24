@@ -10,6 +10,9 @@
 #include <time.h>
 
 int main (int argc, char *argv[]){
+	int size_payload=1000;
+	int num_of_packets=6000;
+	char bytes[size_payload];
 	int preprobe_socket;
 
 	printf("Starting Pre Probing TCP phase\n");
@@ -87,8 +90,8 @@ int main (int argc, char *argv[]){
 	//bind client addrUDP to a different port= 9876
 	int len= sizeof(clientaddrUDP);
 	timer = clock();
-	for(int i=0; i<6000; i++){
-		n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
+	for(int i=0; i<num_of_packets; i++){
+		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
 		/*
 		if(n<0){
 	                perror("Unable to recive packets UDP style");
@@ -113,8 +116,8 @@ int main (int argc, char *argv[]){
 	printf("Now Recieve 'high entropy dat packets'\n");
 	clock_t timer2;
 	timer2=clock();
-	for(int i=0; i<6000; i++){
-		n = recvfrom(sockUDP, (char *) gainer, 256, MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
+	for(int i=0; i<num_of_packets; i++){
+		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
 		/*
 		if(n<0){
 			perror(" Unable to recieve high entropy packets UDP style");
@@ -183,11 +186,11 @@ int main (int argc, char *argv[]){
 
 	char * letter="Was this sent?";
 	
-	int bytes;
-	bytes =send(client_sockPost, (char *)mille, strlen(mille), 0);
-	if(bytes<1){
+	int bytez;
+	bytez =send(client_sockPost, (char *)mille, strlen(mille), 0);
+	if(bytez<1){
 		printf("Nothing was sent\n");
-		printf("size of Byte %d, size of letter %ld\n",bytes, strlen(letter));
+		printf("size of Byte %d, size of letter %ld\n",bytez, strlen(letter));
 	}
 	printf("Sent Client time results\n");
 	printf("ending post probing phase\n");
