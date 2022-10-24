@@ -61,6 +61,9 @@ int main(int argc, char *argv[]){
 
 	//attempting to chagne binding port of client
 	struct sockaddr_in server_address, client_address;
+	memset(&server_address, 0, sizeof(server_address));
+	memset(&client_address, 0, sizeof(client_address));
+
 	server_address.sin_family= AF_INET;
 	server_address.sin_port = htons(port);
 	server_address.sin_addr.s_addr = inet_addr(ip);
@@ -130,9 +133,19 @@ int main(int argc, char *argv[]){
 
 
 	char * packet= "Packet";
-
+	int n;
 	for( int i=0; i<num_of_packets; i++){
-		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+		n= sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+
+		if(n<0){
+                        perror("Unable to recive packets UDP style");
+                        exit(EXIT_FAILURE);
+                }
+                if(n==0){
+                        perror("SOCKET CLOSED BOFRE ALL DATA SENT");
+                        exit(EXIT_FAILURE);
+                }
+
 	}
 	printf("packet sent\n");
 
@@ -141,7 +154,16 @@ int main(int argc, char *argv[]){
 	printf("Now Sending high entropy data\n");
 
 	for(int i=0; i<num_of_packets; i++){
-		sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+		n= sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+		if(n<0){
+                        perror("Unable to recive packets UDP style");
+                        exit(EXIT_FAILURE);
+                }
+                if(n==0){
+                        perror("SOCKET CLOSED BOFRE ALL DATA SENT");
+                        exit(EXIT_FAILURE);
+                }
+
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
