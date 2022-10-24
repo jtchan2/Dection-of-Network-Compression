@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 
 int main(int argc, char *argv[]){
 	printf("Start Pre-probing TCP phase\n");
@@ -101,11 +102,17 @@ int main(int argc, char *argv[]){
 
 
 	//high entropy packet making
+	//
+	unsigned char rngRandomData[size_payload];
+
+	unsigned int rngData = open("rng", O_RDONLY);
+	read(rngData,rngRandomData, size_payload);
+	close(rngData);
 	
 	for(int i=0; i<num_of_packets; i++){
                 high_entropy[i].length= size_payload;
                 for( int j=0; j< (size_payload -2); j++){
-                        high_entropy[i].bytes[j]=0;
+                        high_entropy[i].bytes[j]=rngRandomData[j];
                 }
 
                 id = i;
