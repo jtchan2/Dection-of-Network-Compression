@@ -8,9 +8,15 @@
 #include <unistd.h>
 #include <string.h>
 
+struct packet {
+	
+}
 int main(int argc, char *argv[]){
 	printf("Start Pre-probing TCP phase\n");
 	int preprobe_socket;
+	int num_of_packets=6000;
+	int size_payload=1000;
+	int pause=15;
 
 	char msg[256] = "config file";
 
@@ -69,16 +75,16 @@ int main(int argc, char *argv[]){
 
 	char * packet= "Packet";
 
-	for( int i=0; i<6000; i++){
+	for( int i=0; i<num_of_packets; i++){
 		sendto(sockUDP, (const char *)packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 	}
 	printf("packet sent\n");
 
 	printf("Pausing to split UDP low to high entropy 'data'\n");
-	sleep(15);
+	sleep(pause);i
 	printf("Now Sending high entropy data\n");
 
-	for(int i=0; i<6000; i++){
+	for(int i=0; i<num_of_packets; i++){
 		sendto(sockUDP, (const char *) packet, strlen(packet), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 	}
 	printf("Sent 'high entropy data'\n");
