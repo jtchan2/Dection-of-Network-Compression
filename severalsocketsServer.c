@@ -73,9 +73,9 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	int frag =1;
+	int frag = IP_PMTUDISC_DO;
 
-//	setsockopt(sockUDP, SOL_SOCKET, IPV6_DONTFRAG, &frag, sizeof(frag));
+	setsockopt(sockUDP, IPPROTO_IP, IP_MTU_DISCOVER, &frag, sizeof(frag));
 	
 	printf("created UDP socket\n");
 	if ( bind(sockUDP, (const struct sockaddr *) &serveraddrUDP, sizeof(serveraddrUDP))< 0){
@@ -85,7 +85,7 @@ int main (int argc, char *argv[]){
 	printf("Binded Socket\n");
 
 	clock_t timer;
-	char gainer[256];
+	printf("Now Receiving\n");
 
 	//bind client addrUDP to a different port= 9876
 	int len= sizeof(clientaddrUDP);
@@ -164,8 +164,8 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	int yes =1;
-        setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+	
+        setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
 
 	if( bind(post_sock, (struct sockaddr*) &postserveraddr, sizeof(postserveraddr))<0){
 		perror("Unable to Bind Post probing TCP");
