@@ -1,8 +1,9 @@
 {
 	"server_ip_address":"192.168.86.248",
-	"source_UDP":9876,
-	"destination_UDP":8765,
+	"sourceport_UDP":9876,
+	"destinationport_UDP":8765,
 	"port_TCP":8080,
-	"payload_size":1000,
+	"payload_sizeUDP":1000,
+	"measure_time":15,
 	"number_of_packets":6000
 }
