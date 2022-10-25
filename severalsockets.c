@@ -8,8 +8,107 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include "cJSON.h"
+
+typedef struct
+{
+	char server_ip[100];
+	int sourceUDP_port;
+	int destinationUDP_port;
+	int port_TCP;
+	int payload_size;
+	int measure_time;
+	int num_of_paks;
+}instructions;
+
+//Parsing structure from Json
+
+instructions cJSON_make_struct( char * file, instructions settings){
+	cJSON *json, *item, *object;
+	json = cJSON_Parse(file);
+	//add error catchers later
+	//TODO MAKE item stuff go into settings	
+	item = cJSON_GetObjectItemCaseSensitive(json, "server_ip_address");
+	if(item!=NULL){
+		printf("getobejct got : %s\n", item->string);
+	}
+
+	item = cJSON_GetObjectItemCaseSensitive(json, "sourceport_UDP");
+	if(item!=NULL){
+		printf("getobject got string %s, int value %d\n", item->string, item->valueint);
+	}
+
+	item = cJSON_GetObjectItemCaseSensitive(json, "destinationport_UDP");
+	printf("the %s is %d\n", item->string, item->valueint);
+
+	item = cJSON_GetObjectItemCaseSensitive(json, "port_TCP");
+	printf("the %s is %d\n", item->string, item->valueint);
+
+	item = cJSON_GetObjectItemCaseSensitive(json, "payload_sizeUDP");
+	printf("the %s is %d\n", item->string, item->valueint);
+
+	item = cJSON_GetObjectItemCaseSensitive(json, "measure_time");
+	printf("the %s is %d\n", item->string, item->valueint);
+
+	item = cJSON_GetObjectItemCaseSensitive(json, "number_of_packets");
+	printf("the %s is %d\n", item->string, item->valueint);
+
+	item= cJSON_GetObjectItemCaseSensitive(json, "ttl");
+	if(item == NULL){
+		printf("COuld not find item\n");
+	}
+	cJSON_Delete(json);
+
+	return settings;
+}
+
+size_t get_file_size(const char *filepath){
+	if(filepath == NULL){
+		return 0;
+	}
+	struct stat filestat;
+	memset(&filestat, 0, sizeof(struct stat));
+
+	if(stat(filepath, &filestat) == 0){
+		return filestat.st_size;
+	}else{
+		return 0;
+	}
+}
+
+instructions  read_file(char *filename){
+	FILE *fp;
+	instructions config;
+	/*get file size*/
+	size_t size = get_file_size(filename);
+	if(size==0){
+		printf("failed to get file size\n");
+	}
+
+	char * bufr = malloc(size+1);
+	if(bufr == NULL){
+		printf("Malloc failed\n");
+	}
+
+	memset(bufr, 0, size+1);
+	fp=fopen(filename, "rb");
+
+	fread(bufr, 1, size, fp);
+
+	fclose(fp);
+
+	config = cJSON_make_struct(bufr, config);
+	free(bufr);
+
+	return config;
+
+	printf("reading file complete\n");
+}
 
 int main(int argc, char *argv[]){
+	printf("Getting Config information");
+	instructions config= read_file(argv[1]);
 	printf("Start Pre-probing TCP phase\n");
 	int preprobe_socket;
 	int num_of_packets=6000;
