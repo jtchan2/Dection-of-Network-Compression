@@ -61,6 +61,9 @@ int main(int argc, char *argv[]){
 
 	//attempting to chagne binding port of client
 	struct sockaddr_in server_address, client_address;
+	
+	memset(&server_address, 0, sizeof(server_address));
+	memset(&client_address, 0, sizeof(client_address));
 	server_address.sin_family= AF_INET;
 	server_address.sin_port = htons(port);
 	server_address.sin_addr.s_addr = inet_addr(ip);
