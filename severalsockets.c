@@ -195,7 +195,7 @@ int main(int argc, char *argv[]){
 
 	//int PostprobeServer_sock;
 	char timed[256];
-	int n;
+	//int n;
 	if( (n=recv(postprobe_socket,&timed, sizeof(timed), 0)) <0){
 		perror("unable to Recieve message from Post Phase TCP");
 		exit(EXIT_FAILURE);
