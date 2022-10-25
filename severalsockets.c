@@ -136,6 +136,7 @@ int main(int argc, char *argv[]){
 	char * packet= "Packet";
 
 	for( int i=0; i<num_of_packets; i++){
+		//change MSG_CONFIRM to 0 maybe
 		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 	}
 	printf("packet sent\n");
@@ -145,6 +146,7 @@ int main(int argc, char *argv[]){
 	printf("Now Sending high entropy data\n");
 
 	for(int i=0; i<num_of_packets; i++){
+		//change MSG_CONFIRM to 0 maybe
 		sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 	}
 	printf("Sent 'high entropy data'\n");
