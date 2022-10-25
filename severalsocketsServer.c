@@ -32,7 +32,7 @@ int main (int argc, char *argv[]){
 	memset(&serveraddr, 0, sizeof(serveraddr));	
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port= htons(port);
-	serveraddr.sin_addr.s_addr = inet_addr(ip);
+	serveraddr.sin_addr.s_addr= inet_addr(ip);
 
 	setsockopt(preprobe_socket, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
 	if( bind(preprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
