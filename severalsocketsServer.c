@@ -14,8 +14,6 @@ int main (int argc, char *argv[]){
 	int num_of_packets=6000;
 	char bytes[size_payload];
 	int preprobe_socket;
-	int frag = IP_PMTUDISC_DO;
-
 
 	printf("Starting Pre Probing TCP phase\n");
 	if( (preprobe_socket= socket(AF_INET, SOCK_STREAM, 0))<0){
@@ -31,8 +29,6 @@ int main (int argc, char *argv[]){
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port= htons(port);
 	serveraddr.sin_addr.s_addr = inet_addr(ip);
-
-	setsockopt(preprobe_socket, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
 	if( bind(preprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("Unable to bind pre probing socket");
 		exit(EXIT_FAILURE);
@@ -80,7 +76,7 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	//int frag = IP_PMTUDISC_DO;
+	int frag = IP_PMTUDISC_DO;
 
 	setsockopt(sockUDP, IPPROTO_IP, IP_MTU_DISCOVER, &frag, sizeof(frag));
 	
@@ -99,7 +95,7 @@ int main (int argc, char *argv[]){
 	timer = clock();
 	for(int i=0; i<num_of_packets; i++){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
-		
+		/*
 		if(n<0){
 	                perror("Unable to recive packets UDP style");
         	        exit(EXIT_FAILURE);
@@ -108,8 +104,7 @@ int main (int argc, char *argv[]){
 			perror("SOCKET CLOSED BOFRE ALL DATA SENT");
 			exit(EXIT_FAILURE);
 		}
-		
-
+		*/
 	}
 	timer = clock()-timer;
 	double time_taken = ((double)timer)/CLOCKS_PER_SEC;
