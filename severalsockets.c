@@ -50,6 +50,7 @@ int main(int argc, char *argv[]){
 
 	printf("starting UDP probing Phase\n");
 
+	//Start of UDP Phase
 	int sockUDP;
 	port = 8765;
 	serveraddr.sin_port= htons(port);
@@ -162,7 +163,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	//sleep(10);
+	sleep(5);
 
 	/*
 	int yes =1;

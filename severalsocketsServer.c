@@ -8,7 +8,11 @@
 #include <netdb.h>
 #include <string.h>
 #include <time.h>
+#include <signal.h>
 
+void cleanExit(){
+exit(0);
+}
 int main (int argc, char *argv[]){
 	int size_payload=1000;
 	int num_of_packets=6000;
@@ -59,7 +63,11 @@ int main (int argc, char *argv[]){
 	close(ppclient_socket);
 	close(preprobe_socket);
 
+
 	printf("Starting Probing UDP phase\n");
+
+	signal(SIGTERM, cleanExit);
+	signal(SIGINT, cleanExit);
 
 	// socket to be used for UDp packet sending
 	int sockUDP;
@@ -78,7 +86,7 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	//int frag = IP_PMTUDISC_DO;
+	
 
 	setsockopt(sockUDP, IPPROTO_IP, IP_MTU_DISCOVER, &frag, sizeof(frag));
 	
