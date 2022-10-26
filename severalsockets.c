@@ -30,29 +30,33 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	//add error catchers later
 	//TODO MAKE item stuff go into settings	
 	item = cJSON_GetObjectItemCaseSensitive(json, "server_ip_address");
-	if(item!=NULL){
-		printf("getobejct got : %s\n", item->string);
-	}
+	//printf("getobejct got : %s\n", item->string);
+	strcpy(settings.server_ip, item->valuestring);
+
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "sourceport_UDP");
-	if(item!=NULL){
-		printf("getobject got string %s, int value %d\n", item->string, item->valueint);
-	}
+	//printf("getobject got string %s, int value %d\n", item->string, item->valueint);
+	settings.sourceUDP_port=item->valueint;
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "destinationport_UDP");
-	printf("the %s is %d\n", item->string, item->valueint);
-
+	//printf("the %s is %d\n", item->string, item->valueint);
+	settings.destinationUDP_port=item->valueint;
+	
 	item = cJSON_GetObjectItemCaseSensitive(json, "port_TCP");
-	printf("the %s is %d\n", item->string, item->valueint);
-
+	//printf("the %s is %d\n", item->string, item->valueint);
+	settings.port_TCP= item->valueint;
+	
 	item = cJSON_GetObjectItemCaseSensitive(json, "payload_sizeUDP");
-	printf("the %s is %d\n", item->string, item->valueint);
+	//printf("the %s is %d\n", item->string, item->valueint);
+	settings.payload_size= item->valueint;
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "measure_time");
-	printf("the %s is %d\n", item->string, item->valueint);
+	//printf("the %s is %d\n", item->string, item->valueint);
+	settings.measure_time= item->valueint;
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "number_of_packets");
-	printf("the %s is %d\n", item->string, item->valueint);
+	//printf("the %s is %d\n", item->string, item->valueint);
+	settings.num_of_paks= item->valueint;
 
 	item= cJSON_GetObjectItemCaseSensitive(json, "ttl");
 	if(item == NULL){
@@ -108,7 +112,16 @@ instructions  read_file(char *filename){
 
 int main(int argc, char *argv[]){
 	printf("Getting Config information");
-	//instructions config= read_file(argv[1]);
+	instructions config= read_file(argv[1]);
+	/*
+	printf("%s\n",config.server_ip);
+	printf("%d\n",config.sourceUDP_port);
+	printf("%d\n",config.destinationUDP_port);
+	printf("%d\n",config.port_TCP);
+	printf("%d\n",config.payload_size);
+	printf("%d\n",config.measure_time);
+	printf("%d\n", config.num_of_paks);
+	*/
 	printf("Start Pre-probing TCP phase\n");
 	int preprobe_socket;
 	int num_of_packets=6000;
