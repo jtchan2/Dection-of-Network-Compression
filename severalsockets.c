@@ -133,7 +133,8 @@ int main(int argc, char *argv[]){
 		int length;
 		char bytes[size_payload];
 	};
-	char msg[256] = "config file";
+	char msg[256];
+
 
 	if( (preprobe_socket = socket(AF_INET, SOCK_STREAM, 0))<0){
 		perror("Unable to create Pre-probe Socket");
@@ -154,8 +155,13 @@ int main(int argc, char *argv[]){
 		perror("Unable to connect to server");
 		exit(EXIT_FAILURE);
 	}
-	
+	sprintf(msg, "%d",config.destinationUDP_port);
 	send(preprobe_socket, (char *) msg, sizeof(msg), 0);
+	sprintf(msg, "%d", config.port_TCP);
+	send(preprobe_socket, (char *) msg, sizeof(msg), 0);
+	sprintf(msg, "%d", config.payload_size);
+	send(preprobe_socket, (char *) msg, sizeof(msg), 0);
+	sprintf(msg, "%d", config.num_of_paks);
 
 	close(preprobe_socket);
 	printf("Sent 'config file'\n");

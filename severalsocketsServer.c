@@ -50,15 +50,26 @@ int main (int argc, char *argv[]){
 		perror("Unable to accept Pre probing SOcket");
 		exit(EXIT_FAILURE);
 	}
-	char msg[256];
+	char destination_UDP[256];
+	char port_TCP[256];
+	char paySize [256];
+	char numOfPaks [256];
 	int n;
 
-	if( (n = recv (ppclient_socket, msg, sizeof(msg), 0))<0){
+	if( (n = recv (ppclient_socket, destination_UDP, sizeof(destination_UDP), 0))<0){
 		perror("Unable to recieve message from Pre Probe socket");
 		exit(EXIT_FAILURE);
 	}
-	msg[n]='\0';
-	printf("CLient has sent : %s\n", msg);
+	recv(ppclient_socket, port_TCP, sizeof(port_TCP), 0);
+	recv(ppclient_socket, paySize, sizeof(paySize), 0);
+	recv(ppclient_socket, numOfPaks, sizeof(numOfPaks), 0);
+	destination_UDP[n]='\0';
+	printf("CLient has sent : %s\n", destination_UDP);
+	printf("%s\n", port_TCP);
+	printf("%s\n", paySize);
+	printf("%s\n", numOfPaks);
+
+
 	printf("Ending Pre Probing TCP phase\n");
 	close(ppclient_socket);
 	close(preprobe_socket);
