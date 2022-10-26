@@ -141,7 +141,8 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	int port = 8756;
-	char * ip= "192.168.86.248";
+	//char * ip= "192.168.86.248";
+	char *ip = config.server_ip;
 	struct sockaddr_in serveraddr;
 	port = config.port_TCP;
 
