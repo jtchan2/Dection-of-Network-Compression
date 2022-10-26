@@ -108,7 +108,7 @@ instructions  read_file(char *filename){
 
 int main(int argc, char *argv[]){
 	printf("Getting Config information");
-	instructions config= read_file(argv[1]);
+	//instructions config= read_file(argv[1]);
 	printf("Start Pre-probing TCP phase\n");
 	int preprobe_socket;
 	int num_of_packets=6000;
@@ -183,16 +183,19 @@ int main(int argc, char *argv[]){
 
 	struct packet *high_entropy = (struct packet *)malloc (num_of_packets * sizeof(struct packet));
 
-	unsigned short id;
+	unsigned short id=0;;
 	for(int i=0; i<num_of_packets; i++){
 		low_entropy[i].length= size_payload;
 		for( int j=0; j< (size_payload -2); j++){
 			low_entropy[i].bytes[j]=0;
 		}
 
-		id = i;
-		char packid[50];
-		sprintf(packid, "%d", id);
+		//id = i;
+		char packid[2];
+		packid[0]=id%256;
+		packid[1]=id/256;
+		id++;
+		//sprintf(packid, "%d", id);
 
 		char * payload = (char *) malloc(strlen(low_entropy[i].bytes)+ strlen(packid)+1);
 
@@ -218,9 +221,12 @@ int main(int argc, char *argv[]){
                         high_entropy[i].bytes[j]=rngRandomData[j];
                 }
 
-                id = i;
-                char packid[50];
-                sprintf(packid, "%d", id);
+                //id = i;
+                char packid[2];
+		packid[0]=id%256;
+		packid[1]=id/256;
+		id++;
+                //sprintf(packid, "%d", id);
 
                 char * payload = (char *) malloc(strlen(high_entropy[i].bytes)+ strlen(packid)+1);
 
