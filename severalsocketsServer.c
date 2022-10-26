@@ -60,10 +60,14 @@ int main (int argc, char *argv[]){
 		perror("Unable to recieve message from Pre Probe socket");
 		exit(EXIT_FAILURE);
 	}
-	recv(ppclient_socket, port_TCP, sizeof(port_TCP), 0);
-	recv(ppclient_socket, paySize, sizeof(paySize), 0);
-	recv(ppclient_socket, numOfPaks, sizeof(numOfPaks), 0);
 	destination_UDP[n]='\0';
+	n=recv(ppclient_socket, port_TCP, sizeof(port_TCP), 0);
+	port_TCP[n]='\0';
+	n=recv(ppclient_socket, paySize, sizeof(paySize), 0);
+	paySize[n]='\0';
+	n=recv(ppclient_socket, numOfPaks, sizeof(numOfPaks), 0);
+	numOfPaks[n]='\0';
+	//destination_UDP[n]='\0';
 	printf("CLient has sent : %s\n", destination_UDP);
 	printf("%s\n", port_TCP);
 	printf("%s\n", paySize);

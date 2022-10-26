@@ -162,6 +162,7 @@ int main(int argc, char *argv[]){
 	sprintf(msg, "%d", config.payload_size);
 	send(preprobe_socket, (char *) msg, sizeof(msg), 0);
 	sprintf(msg, "%d", config.num_of_paks);
+	send(preprobe_socket, (char *)msg, sizeof(msg),0);
 
 	close(preprobe_socket);
 	printf("Sent 'config file'\n");
