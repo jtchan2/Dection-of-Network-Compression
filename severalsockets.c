@@ -124,9 +124,9 @@ int main(int argc, char *argv[]){
 	*/
 	printf("Start Pre-probing TCP phase\n");
 	int preprobe_socket;
-	int num_of_packets=6000;
-	int size_payload=1000;
-	int pause=15;
+	int num_of_packets=config.num_of_paks;
+	int size_payload=config.payload_size;
+	int pause=config.measure_time;
 
 
 	struct packet{
@@ -139,10 +139,10 @@ int main(int argc, char *argv[]){
 		perror("Unable to create Pre-probe Socket");
 		exit(EXIT_FAILURE);
 	}
-	int port = 8765;
+	int port = 8756;
 	char * ip= "192.168.86.248";
 	struct sockaddr_in serveraddr;
-	port = 8080;
+	port = config.port_TCP;
 
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]){
 
 	//Start of UDP Phase
 	int sockUDP;
-	port = 8765;
+	port = config.destinationUDP_port;
 	serveraddr.sin_port= htons(port);
 
 	if( (sockUDP = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
@@ -181,8 +181,9 @@ int main(int argc, char *argv[]){
 	server_address.sin_port = htons(port);
 	server_address.sin_addr.s_addr = inet_addr(ip);
 
+	port = config.sourceUDP_port;
 	client_address.sin_family= AF_INET;
-	client_address.sin_port = htons(9876);
+	client_address.sin_port = htons(port);
 	client_address.sin_addr.s_addr = inet_addr("192.168.86.249");
 
 	if(bind(sockUDP, (struct sockaddr *) &client_address, sizeof(client_address))<0){
@@ -277,6 +278,7 @@ int main(int argc, char *argv[]){
 	int postprobe_socket;
 
 	port = 8080;
+	port = config.port_TCP;
 	serveraddr.sin_port= htons(port);
 	if( (postprobe_socket = socket (AF_INET, SOCK_STREAM, 0))<0){
 		perror("COULD NOT CREATE POST PROBE PHASE SOCKET TCP");
