@@ -14,9 +14,9 @@ void cleanExit(){
 exit(0);
 }
 int main (int argc, char *argv[]){
-	int size_payload=1000;
-	int num_of_packets=6000;
-	char bytes[size_payload];
+	//int size_payload=1000;
+	//int num_of_packets=6000;
+	//char bytes[size_payload];
 	int preprobe_socket;
 	int frag = IP_PMTUDISC_DO;
 	printf("Starting Pre Probing TCP phase\n");
@@ -73,7 +73,9 @@ int main (int argc, char *argv[]){
 	printf("%s\n", paySize);
 	printf("%s\n", numOfPaks);
 	port = atoi(destination_UDP);
-
+	int size_payload = atoi(paySize);
+	char bytes[size_payload];
+	int num_of_packets= atoi(numOfPaks);
 
 	printf("Ending Pre Probing TCP phase\n");
 	close(ppclient_socket);
@@ -228,5 +230,6 @@ int main (int argc, char *argv[]){
 	printf("ending post probing phase\n");
 	close(post_sock);
 	close(client_sockPost);
-	//hello
+	
+	return 0;
 }	
