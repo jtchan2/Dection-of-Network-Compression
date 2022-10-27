@@ -131,11 +131,13 @@ int main (int argc, char *argv[]){
 	paySize[n]='\0';
 	n=recv(ppclient_socket, numOfPaks, sizeof(numOfPaks), 0);
 	numOfPaks[n]='\0';
-	
+
+	/*	
 	printf("CLient has sent : %s\n", destination_UDP);
 	printf("%s\n", port_TCP);
 	printf("%s\n", paySize);
 	printf("%s\n", numOfPaks);
+	*/
 	port = atoi(destination_UDP);
 	int size_payload = atoi(paySize);
 	char bytes[size_payload];
@@ -178,6 +180,39 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	printf("Binded Socket\n");
+
+
+	//trying to create TCP here
+	int post_sock;
+	port= atoi(port_TCP);
+	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
+                perror("Unable to connect Post Probing TCP socket");
+                exit(EXIT_FAILURE);
+        }
+
+
+        setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
+
+        if( bind(post_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
+                perror("Unable to Bind Post probing TCP");
+                exit(EXIT_FAILURE);
+        }
+	int checkycheck;
+        if((checkycheck=listen(post_sock, 5))<0){
+                perror("Not able to listen for Post Probing Phase TCP");
+                exit(EXIT_FAILURE);
+        }
+
+	/* trying to find out when a connection is queued
+	int client_sockPost;
+	if((client_sockPost= accept(post_sock, (struct sockaddr*) &client_addr, &addr_size))<0){
+                perror("Not able to Accept for Post Probing pahse TCP");
+                exit(EXIT_FAILURE);
+        }
+	*/
+
+
+// tcp created here 
 
 	clock_t timer;
 	printf("Now Receiving\n");
@@ -245,18 +280,13 @@ int main (int argc, char *argv[]){
 
 	printf("Starting Post probing phase TCP\n");
 
-	int post_sock;
+	//TESTING MOVING TCP UP
+	//int post_sock;
 
 	//port=8080;
-	port= atoi(port_TCP);
+	//port= atoi(port_TPC);
+
 	/*
-	struct sockaddr_in postserveraddr;
-	postserveraddr.sin_family= AF_INET;
-	postserveraddr.sin_port= htons(port);
-	postserveraddr.sin_addr.s_addr= inet_addr(ip);
-	*/
-
-
 	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
 		perror("Unable to connect Post Probing TCP socket");
 		exit(EXIT_FAILURE);
@@ -274,13 +304,18 @@ int main (int argc, char *argv[]){
 		perror("Not able to listen for Post Probing Phase TCP");
 		exit(EXIT_FAILURE);
 	}
-
+	*/
+	//try to get notification when accept arrives
+	//printf("%d\n", checkycheck);
 	int client_sockPost;
 	//may need to add new client_addr and addr_size
+	//
+	
 	if((client_sockPost= accept(post_sock, (struct sockaddr*) &client_addr, &addr_size))<0){
 		perror("Not able to Accept for Post Probing pahse TCP");
 		exit(EXIT_FAILURE);
 	}
+	
 
 	char * letter="Was this sent?";
 	
