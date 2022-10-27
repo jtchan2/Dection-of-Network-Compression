@@ -9,6 +9,65 @@
 #include <string.h>
 #include <time.h>
 #include <signal.h>
+#include <sys/stat.h>
+#include "cJSON.h"
+
+typedef struct{
+	int port_TCP;
+}instructions;
+
+instructions cJSON_make_struct(char* file, instructions settings){
+	cJSON *json, *item;
+	json = cJSON_Parse(file);
+	item = cJSON_GetObjectItemCaseSensitive(json, "port_TCP");
+	settings.port_TCP= item->valueint;
+
+	cJSON_Delete(json);
+
+	return settings;
+}
+
+size_t get_file_size(const char *filepath){
+	if(filepath== NULL){
+		printf("Incorrect file path");
+		return 0;
+	}
+
+	struct stat filestat;
+	memset(&filestat, 0, sizeof(struct stat));
+
+	//gets information
+	if(stat(filepath, &filestat)==0){
+		return filestat.st_size;
+	}else{
+		return 0;
+	}
+}
+
+instructions read_file (char *filename){
+	FILE *fp;
+	instructions config;
+	size_t size = get_file_size(filename);
+	if(size == 0){
+		printf("failed to get file path size\n");
+	}
+	char * bufr = malloc (size +1);
+	if(bufr == NULL){
+		printf ("Malloc fialed\n");
+	}
+
+	memset(bufr, 0, size+1);
+	fp= fopen(filename, "rb");
+
+	fread(bufr, 1, size, fp);
+
+	fclose(fp);
+	config = cJSON_make_struct(bufr, config);
+	free(bufr);
+	
+	printf("finished reading and parsing config file\n");
+	return config;
+}
 
 void cleanExit(){
 exit(0);
@@ -17,6 +76,11 @@ int main (int argc, char *argv[]){
 	//int size_payload=1000;
 	//int num_of_packets=6000;
 	//char bytes[size_payload];
+	
+	printf("Getting config file Information\n");
+	instructions config= read_file(argv[1]);
+	printf("%d\n", config.port_TCP);
+	
 	int preprobe_socket;
 	int frag = IP_PMTUDISC_DO;
 	printf("Starting Pre Probing TCP phase\n");
@@ -24,11 +88,11 @@ int main (int argc, char *argv[]){
 		perror("Unable to create pre probing Socket");
 		exit(EXIT_FAILURE);
 	}
-	int port = 8765;
+	int port;
 	char * ip= "192.168.86.248";
 	struct sockaddr_in serveraddr;
 
-	port = 8080;
+	port = config.port_TCP;
 	memset(&serveraddr, 0, sizeof(serveraddr));	
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port= htons(port);
@@ -183,7 +247,7 @@ int main (int argc, char *argv[]){
 
 	int post_sock;
 
-	port=8080;
+	//port=8080;
 	port= atoi(port_TCP);
 	/*
 	struct sockaddr_in postserveraddr;
