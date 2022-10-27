@@ -13,12 +13,15 @@
 #include "cJSON.h"
 
 typedef struct{
+	char server_ip[100];
 	int port_TCP;
 }instructions;
 
 instructions cJSON_make_struct(char* file, instructions settings){
 	cJSON *json, *item;
 	json = cJSON_Parse(file);
+	item = cJSON_GetObjectItemCaseSensitive(json, "server_ip");
+	strcpy(settings.server_ip, item->valuestring);
 	item = cJSON_GetObjectItemCaseSensitive(json, "port_TCP");
 	settings.port_TCP= item->valueint;
 
@@ -73,23 +76,23 @@ void cleanExit(){
 exit(0);
 }
 int main (int argc, char *argv[]){
-	//int size_payload=1000;
-	//int num_of_packets=6000;
-	//char bytes[size_payload];
 	
+	// pre config file recieving from Server
 	printf("Getting config file Information\n");
 	instructions config= read_file(argv[1]);
-	printf("%d\n", config.port_TCP);
+	
 	
 	int preprobe_socket;
 	int frag = IP_PMTUDISC_DO;
+	
 	printf("Starting Pre Probing TCP phase\n");
+	
 	if( (preprobe_socket= socket(AF_INET, SOCK_STREAM, 0))<0){
 		perror("Unable to create pre probing Socket");
 		exit(EXIT_FAILURE);
 	}
 	int port;
-	char * ip= "192.168.86.248";
+	char * ip= config.server_ip;
 	struct sockaddr_in serveraddr;
 
 	port = config.port_TCP;
@@ -110,6 +113,7 @@ int main (int argc, char *argv[]){
 	struct sockaddr_storage client_addr;
 	socklen_t addr_size;
 	addr_size = sizeof(client_addr);
+
 	if( (ppclient_socket = accept(preprobe_socket, (struct sockaddr*) &client_addr, &addr_size)) <0){
 		perror("Unable to accept Pre probing SOcket");
 		exit(EXIT_FAILURE);
@@ -132,12 +136,7 @@ int main (int argc, char *argv[]){
 	n=recv(ppclient_socket, numOfPaks, sizeof(numOfPaks), 0);
 	numOfPaks[n]='\0';
 
-	/*	
-	printf("CLient has sent : %s\n", destination_UDP);
-	printf("%s\n", port_TCP);
-	printf("%s\n", paySize);
-	printf("%s\n", numOfPaks);
-	*/
+	
 	port = atoi(destination_UDP);
 	int size_payload = atoi(paySize);
 	char bytes[size_payload];
@@ -203,7 +202,7 @@ int main (int argc, char *argv[]){
                 exit(EXIT_FAILURE);
         }
 
-	/* trying to find out when a connection is queued
+	/* trying to find out when a connection is queued, it does not work
 	int client_sockPost;
 	if((client_sockPost= accept(post_sock, (struct sockaddr*) &client_addr, &addr_size))<0){
                 perror("Not able to Accept for Post Probing pahse TCP");
@@ -222,51 +221,32 @@ int main (int argc, char *argv[]){
 	timer = clock();
 	for(int i=0; i<num_of_packets; i++){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
-		/*
-		if(n<0){
-	                perror("Unable to recive packets UDP style");
-        	        exit(EXIT_FAILURE);
-	       	}
-		if(n==0){
-			perror("SOCKET CLOSED BOFRE ALL DATA SENT");
-			exit(EXIT_FAILURE);
-		}
-		*/
+		
 	}
 	timer = clock()-timer;
 	double time_taken = ((double)timer)/CLOCKS_PER_SEC;
-	/*
-	gainer[n] = '\0';
-	printf("Server Recieved : %s, time: %f\n", gainer, time_taken);
-	*/
+	
 	printf("recieved packets\n");
 	printf("Recieving 'high entropy data/packets' after a short break\n");
-	//sleep(15);
+	
 
 	printf("Now Recieve 'high entropy dat packets'\n");
 	clock_t timer2;
 	timer2=clock();
 	for(int i=0; i<num_of_packets; i++){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
-		/*
-		if(n<0){
-			perror(" Unable to recieve high entropy packets UDP style");
-			exit(EXIT_FAILURE);
-		}
-		*/
+		
 
 	}
 	
 	timer2= clock()-timer2;
 	double time_taken2= ((double)timer2)/CLOCKS_PER_SEC;
-	/*
-	gainer[n] = '\0';
-	printf("Server Recieved High data : %s, time taken: %f\n", gainer,time_taken2);
-	*/
+	
 	printf("recieved packts\n");
 
 	printf("Probing UDP phase ending\n");
 	close(sockUDP);
+	
 	//Does math of finding time difference in seconds then converts to MS
 	double time_overall = (time_taken2 - time_taken)*((double)1000);
 	char  *mille;
@@ -275,7 +255,7 @@ int main (int argc, char *argv[]){
 	}else{
 		mille="No compression was Dected";
 	}
-	//sprintf(mille, "%f", time_overall);
+	
 	printf("Time difference is %s ms\n", mille);
 	
 
@@ -309,9 +289,8 @@ int main (int argc, char *argv[]){
 	//try to get notification when accept arrives
 	//printf("%d\n", checkycheck);
 	int client_sockPost;
-	//may need to add new client_addr and addr_size
-	//
 	
+		
 	if((client_sockPost= accept(post_sock, (struct sockaddr*) &client_addr, &addr_size))<0){
 		perror("Not able to Accept for Post Probing pahse TCP");
 		exit(EXIT_FAILURE);
