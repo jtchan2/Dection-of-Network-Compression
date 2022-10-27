@@ -1,5 +1,6 @@
 {
 	"server_ip_address":"192.168.86.248",
+	"client_ip_address":"192.168.86.249",
 	"sourceport_UDP":9876,
 	"destinationport_UDP":8765,
 	"port_TCP":8080,

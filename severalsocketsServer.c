@@ -254,6 +254,7 @@ int main (int argc, char *argv[]){
 			exit(EXIT_FAILURE);
 		}
 		*/
+
 	}
 	
 	timer2= clock()-timer2;

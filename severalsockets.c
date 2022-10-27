@@ -14,6 +14,7 @@
 typedef struct
 {
 	char server_ip[100];
+	char client_ip[100];
 	int sourceUDP_port;
 	int destinationUDP_port;
 	int port_TCP;
@@ -33,6 +34,8 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	//printf("getobejct got : %s\n", item->string);
 	strcpy(settings.server_ip, item->valuestring);
 
+	item =cJSON_GetObjectItemCaseSensitive(json, "client_ip_address");
+	strcpy(settings.client_ip, item->valuestring);
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "sourceport_UDP");
 	//printf("getobject got string %s, int value %d\n", item->string, item->valueint);
@@ -143,6 +146,7 @@ int main(int argc, char *argv[]){
 	int port = 8756;
 	//char * ip= "192.168.86.248";
 	char *ip = config.server_ip;
+	char *clientip= config.client_ip;
 	struct sockaddr_in serveraddr;
 	port = config.port_TCP;
 
@@ -192,7 +196,7 @@ int main(int argc, char *argv[]){
 	port = config.sourceUDP_port;
 	client_address.sin_family= AF_INET;
 	client_address.sin_port = htons(port);
-	client_address.sin_addr.s_addr = inet_addr("192.168.86.249");
+	client_address.sin_addr.s_addr = inet_addr(clientip);
 
 	if(bind(sockUDP, (struct sockaddr *) &client_address, sizeof(client_address))<0){
 		perror("Unable to Bind UDP socket");
@@ -294,7 +298,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	sleep(5);
+	//sleep(5);
 
 	/*
 	int yes =1;
