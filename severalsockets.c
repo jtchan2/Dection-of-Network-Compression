@@ -205,7 +205,7 @@ int main(int argc, char *argv[]){
 
 	struct packet *high_entropy = (struct packet *)malloc (num_of_packets * sizeof(struct packet));
 
-	unsigned short id=0;;
+	unsigned short id=0;
 	for(int i=0; i<num_of_packets; i++){
 		low_entropy[i].length= size_payload;
 		for( int j=0; j< (size_payload -2); j++){
@@ -236,7 +236,8 @@ int main(int argc, char *argv[]){
 	unsigned int rngData = open("rng", O_RDONLY);
 	read(rngData,rngRandomData, size_payload);
 	close(rngData);
-	
+
+	id=0;
 	for(int i=0; i<num_of_packets; i++){
                 high_entropy[i].length= size_payload;
                 for( int j=0; j< (size_payload -2); j++){
