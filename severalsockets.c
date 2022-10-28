@@ -221,7 +221,7 @@ int main(int argc, char *argv[]){
 		packid[0]=id%256;
 		packid[1]=id/256;
 		id++;
-		//sprintf(packid, "%d", id);
+		
 
 		char * payload = (char *) malloc(strlen(low_entropy[i].bytes)+ strlen(packid)+1);
 
@@ -229,7 +229,7 @@ int main(int argc, char *argv[]){
 		
 		strcat(payload, low_entropy[i].bytes);
 		strcpy(low_entropy[i].bytes, payload);
-		//strcpy(low_entropy[i].bytes, conversion);
+		
 	}
 
 
@@ -248,12 +248,12 @@ int main(int argc, char *argv[]){
                         high_entropy[i].bytes[j]=rngRandomData[j];
                 }
 
-                //id = i;
+                
                 char packid[2];
 		packid[0]=id%256;
 		packid[1]=id/256;
 		id++;
-                //sprintf(packid, "%d", id);
+                
 
                 char * payload = (char *) malloc(strlen(high_entropy[i].bytes)+ strlen(packid)+1);
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]){
 
                 strcat(payload, high_entropy[i].bytes);
                 strcpy(high_entropy[i].bytes, payload);
-                //strcpy(high_entropy[i].bytes, conversion);
+                
         }
 
 
@@ -270,6 +270,7 @@ int main(int argc, char *argv[]){
 	for( int i=0; i<num_of_packets; i++){
 		//change MSG_CONFIRM to 0 maybe
 		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+		usleep(500);
 	}
 	printf("packet sent\n");
 
@@ -280,6 +281,7 @@ int main(int argc, char *argv[]){
 	for(int i=0; i<num_of_packets; i++){
 		//change MSG_CONFIRM to 0 maybe
 		sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+		usleep(500);
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");

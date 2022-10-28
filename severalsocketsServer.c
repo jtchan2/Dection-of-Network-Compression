@@ -220,7 +220,9 @@ int main (int argc, char *argv[]){
 	int len= sizeof(clientaddrUDP);
 	timer = clock();
 	for(int i=0; i<num_of_packets; i++){
+
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
+		//usleep(500);
 		
 	}
 	timer = clock()-timer;
@@ -235,8 +237,7 @@ int main (int argc, char *argv[]){
 	timer2=clock();
 	for(int i=0; i<num_of_packets; i++){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
-		
-
+		//usleep(500);
 	}
 	
 	timer2= clock()-timer2;
