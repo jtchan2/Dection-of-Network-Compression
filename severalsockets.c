@@ -116,15 +116,7 @@ instructions  read_file(char *filename){
 int main(int argc, char *argv[]){
 	printf("Getting Config information");
 	instructions config= read_file(argv[1]);
-	/*
-	printf("%s\n",config.server_ip);
-	printf("%d\n",config.sourceUDP_port);
-	printf("%d\n",config.destinationUDP_port);
-	printf("%d\n",config.port_TCP);
-	printf("%d\n",config.payload_size);
-	printf("%d\n",config.measure_time);
-	printf("%d\n", config.num_of_paks);
-	*/
+	
 	printf("Start Pre-probing TCP phase\n");
 	int preprobe_socket;
 	int num_of_packets=config.num_of_paks;
@@ -144,7 +136,6 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	int port = 8756;
-	//char * ip= "192.168.86.248";
 	char *ip = config.server_ip;
 	char *clientip= config.client_ip;
 	struct sockaddr_in serveraddr;
@@ -160,6 +151,8 @@ int main(int argc, char *argv[]){
 		perror("Unable to connect to server");
 		exit(EXIT_FAILURE);
 	}
+	
+	//Sending config information to the server
 	sprintf(msg, "%d",config.destinationUDP_port);
 	send(preprobe_socket, (char *) msg, sizeof(msg), 0);
 	sprintf(msg, "%d", config.port_TCP);
@@ -203,7 +196,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	//TODO Create actual packts to be sent not a message
+	
 
 	struct packet *low_entropy = (struct packet *) malloc (num_of_packets * sizeof(struct packet));
 
@@ -216,7 +209,7 @@ int main(int argc, char *argv[]){
 			low_entropy[i].bytes[j]=0;
 		}
 
-		//id = i;
+		
 		char packid[2];
 		packid[0]=id%256;
 		packid[1]=id/256;
@@ -279,14 +272,14 @@ int main(int argc, char *argv[]){
 	printf("Now Sending high entropy data\n");
 
 	for(int i=0; i<num_of_packets; i++){
-		//change MSG_CONFIRM to 0 maybe
+		
 		sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 		usleep(500);
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
-	//close(sockUDP);
-	shutdown(sockUDP, 1);
+	close(sockUDP);
+	//shutdown(sockUDP, 1);
 	
 	printf("starting post probe TCP\n");
 
@@ -300,19 +293,14 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	//sleep(5);
-
-	/*
-	int yes =1;
-	setsockopt(postprobe_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
-	*/
+	
 	int PostprobeServer_sock;
 	if( connect(postprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("COUKD NOT CONNECT POST PROBE TCP SOCKET");
 		exit(EXIT_FAILURE);
 	}
 
-	//int PostprobeServer_sock;
+	
 	char timed[256];
 	int n;
 	if( (n=recv(postprobe_socket,&timed, sizeof(timed), 0)) <0){

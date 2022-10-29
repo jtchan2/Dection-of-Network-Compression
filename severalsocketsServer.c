@@ -128,6 +128,8 @@ int main (int argc, char *argv[]){
 		perror("Unable to recieve message from Pre Probe socket");
 		exit(EXIT_FAILURE);
 	}
+
+	// Setting of variables after reading/ receiving information from client
 	destination_UDP[n]='\0';
 	n=recv(ppclient_socket, port_TCP, sizeof(port_TCP), 0);
 	port_TCP[n]='\0';
@@ -181,7 +183,7 @@ int main (int argc, char *argv[]){
 	printf("Binded Socket\n");
 
 
-	//trying to create TCP here
+	// create Post TCP here
 	int post_sock;
 	port= atoi(port_TCP);
 	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
@@ -202,13 +204,7 @@ int main (int argc, char *argv[]){
                 exit(EXIT_FAILURE);
         }
 
-	/* trying to find out when a connection is queued, it does not work
-	int client_sockPost;
-	if((client_sockPost= accept(post_sock, (struct sockaddr*) &client_addr, &addr_size))<0){
-                perror("Not able to Accept for Post Probing pahse TCP");
-                exit(EXIT_FAILURE);
-        }
-	*/
+	
 
 
 // tcp created here 
@@ -216,13 +212,13 @@ int main (int argc, char *argv[]){
 	clock_t timer;
 	printf("Now Receiving\n");
 
-	//bind client addrUDP to a different port= 9876
+	
 	int len= sizeof(clientaddrUDP);
 	timer = clock();
 	for(int i=0; i<num_of_packets; i++){
 
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
-		//usleep(500);
+		
 		
 	}
 	timer = clock()-timer;
@@ -237,7 +233,7 @@ int main (int argc, char *argv[]){
 	timer2=clock();
 	for(int i=0; i<num_of_packets; i++){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
-		//usleep(500);
+		
 	}
 	
 	timer2= clock()-timer2;
@@ -254,41 +250,16 @@ int main (int argc, char *argv[]){
 	if(time_overall >((double)100)){
 		mille="Compression Detected!";
 	}else{
-		mille="No compression was Dected";
+		mille="No compression was Detected";
 	}
 	
-	printf("Time difference is %s ms\n", mille);
+	printf("Is There Compressions? : %s \n", mille);
 	
 
 	printf("Starting Post probing phase TCP\n");
 
-	//TESTING MOVING TCP UP
-	//int post_sock;
-
-	//port=8080;
-	//port= atoi(port_TPC);
-
-	/*
-	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
-		perror("Unable to connect Post Probing TCP socket");
-		exit(EXIT_FAILURE);
-	}
-
 	
-        setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
-
-	if( bind(post_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
-		perror("Unable to Bind Post probing TCP");
-		exit(EXIT_FAILURE);
-	}
-
-	if(listen(post_sock, 5)<0){
-		perror("Not able to listen for Post Probing Phase TCP");
-		exit(EXIT_FAILURE);
-	}
-	*/
-	//try to get notification when accept arrives
-	//printf("%d\n", checkycheck);
+	//TCP post now accepting any incoming TCP connections
 	int client_sockPost;
 	
 		
@@ -297,14 +268,12 @@ int main (int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	
-
-	char * letter="Was this sent?";
 	
 	int bytez;
 	bytez =send(client_sockPost, (char *)mille, strlen(mille), 0);
 	if(bytez<1){
 		printf("Nothing was sent\n");
-		printf("size of Byte %d, size of letter %ld\n",bytez, strlen(letter));
+		
 	}
 	printf("Sent Client time results\n");
 	printf("ending post probing phase\n");
