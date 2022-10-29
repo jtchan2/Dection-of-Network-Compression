@@ -233,7 +233,7 @@ int main(int argc, char *argv[]){
 	unsigned int rngData = open("rng", O_RDONLY);
 	read(rngData,rngRandomData, size_payload);
 	close(rngData);
-
+	
 	id=0;
 	for(int i=0; i<num_of_packets; i++){
                 high_entropy[i].length= size_payload;
@@ -260,21 +260,21 @@ int main(int argc, char *argv[]){
 
 	char * packet= "Packet";
 
+	printf("Now Sending Low entropy data packets\n");
 	for( int i=0; i<num_of_packets; i++){
-		//change MSG_CONFIRM to 0 maybe
 		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
-		usleep(500);
+		usleep(100);
 	}
 	printf("packet sent\n");
 
-	printf("Pausing to split UDP low to high entropy 'data'\n");
+	printf("Pausing to split UDP low packet data to send high entropy 'data'\n");
 	sleep(pause);
 	printf("Now Sending high entropy data\n");
 
 	for(int i=0; i<num_of_packets; i++){
 		
 		sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
-		usleep(500);
+		usleep(100);
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
@@ -285,7 +285,6 @@ int main(int argc, char *argv[]){
 
 	int postprobe_socket;
 
-	port = 8080;
 	port = config.port_TCP;
 	serveraddr.sin_port= htons(port);
 	if( (postprobe_socket = socket (AF_INET, SOCK_STREAM, 0))<0){

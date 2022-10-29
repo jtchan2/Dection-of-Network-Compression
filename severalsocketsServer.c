@@ -182,6 +182,8 @@ int main (int argc, char *argv[]){
 	}
 	printf("Binded Socket\n");
 
+	printf("Now Receiving Low Entropy packets\n");
+
 
 	// create Post TCP here
 	int post_sock;
@@ -210,8 +212,6 @@ int main (int argc, char *argv[]){
 // tcp created here 
 
 	clock_t timer;
-	printf("Now Receiving\n");
-
 	
 	int len= sizeof(clientaddrUDP);
 	timer = clock();
@@ -224,11 +224,12 @@ int main (int argc, char *argv[]){
 	timer = clock()-timer;
 	double time_taken = ((double)timer)/CLOCKS_PER_SEC;
 	
-	printf("recieved packets\n");
+	printf("recieved Low Entropy packets\n");
+	printf("\n");
 	printf("Recieving 'high entropy data/packets' after a short break\n");
-	
+	printf("\n");
 
-	printf("Now Recieve 'high entropy dat packets'\n");
+	printf("Now Recieve high entropy data packets'\n");
 	clock_t timer2;
 	timer2=clock();
 	for(int i=0; i<num_of_packets; i++){
@@ -239,7 +240,7 @@ int main (int argc, char *argv[]){
 	timer2= clock()-timer2;
 	double time_taken2= ((double)timer2)/CLOCKS_PER_SEC;
 	
-	printf("recieved packts\n");
+	printf("recieved High entropy packts\n");
 
 	printf("Probing UDP phase ending\n");
 	close(sockUDP);
