@@ -18,7 +18,7 @@ To run code you would first do: ./severalsocketServer configserve.json
 on your client vm or machine 
 
 (3) Incomplete/ explanation
-In my code there is on error where the client UDP packet sending finishes before server receiving has completed so that the client is waiting for a reponse from server. TO fix, jsut cntrlC and run code again, it will run fine where server recieves around same time client receives.
+In my code there is on error where the client UDP packet sending finishes before server receiving has finished recieving all UDP packts so to fix the issues, implemented a usleep() which puts the program to sleep for 100 milliseconds to allow for each recv to get 1 send packet.
 
 Design choice:
 I have moved the socket creating for post TCP right after UDP port bidning to ensure that when the client finishes sending packets to the server, it can connect to a TCP port and wait to receive infomation instead of hitting a connection refused error for when it would try to connect before post TCP socket would be created.
