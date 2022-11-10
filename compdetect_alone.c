@@ -33,58 +33,96 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	//TODO MAKE item stuff go into settings
 	item = cJSON_GetObjectItemCaseSensitive(json, "server_ip_address");
 	//printf("getobejct got : %s\n", item->string);
-	strcpy(settings.server_ip, item->valuestring);
+	if(item== NULL){
+		printf("Missing server ip addreess. Please include in config file. Exiting now\n");
+		exit(0);
+	}else{
+		strcpy(settings.server_ip, item->valuestring);
+	}
 
 	item =cJSON_GetObjectItemCaseSensitive(json, "client_ip_address");
-	strcpy(settings.client_ip, item->valuestring);
-
+	if(item== NULL){
+		printf("Missing client Ip address in config please include. Now exiting\n");
+		exit(0);
+	}else{
+		strcpy(settings.client_ip, item->valuestring);
+	}
 	item = cJSON_GetObjectItemCaseSensitive(json, "sourceport_UDP");
 	//printf("getobject got string %s, int value %d\n", item->string, item->valueint);
-	settings.sourceUDP_port=item->valueint;
+	if(item == NULL){
+		printf("Missing source UDP prot in config file. Please include. Now Exiting \n");
+		exit(0);
+	}else{
+		settings.sourceUDP_port=item->valueint;
+	}
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "destinationport_UDP");
 	//printf("the %s is %d\n", item->string, item->valueint);
-	settings.destinationUDP_port=item->valueint;
+	if(item == NULL){
+		printf("Missing UDP destination port in config file. please include. Exiting now\n");
+		exit(0);
+	}else{
+		settings.destinationUDP_port=item->valueint;
+	}
 
+	
 	item = cJSON_GetObjectItemCaseSensitive(json, "TCP_Head_Syn");
-	settings.port_sinHead= item->valueint;
+	if(item==NULL){
+		printf("Mising  TCP head Syn x port in config file. Please include Head port\nExiting now\n");
+		exit(0);
+	}else{
+		settings.port_sinHead= item->valueint;
+	}
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "TCP_Tail_Syn");
-	settings.port_sinTail= item->valueint;
-
+	if(item == NULL){
+		printf("Missing TCP tail Syn y port in config file. Please include it. Exiting now\n");
+		exit(0);
+	}else{
+		settings.port_sinTail= item->valueint;
+	}
+	
 	item = cJSON_GetObjectItemCaseSensitive(json, "port_TCP");
 	//printf("the %s is %d\n", item->string, item->valueint);
-	settings.port_TCP= item->valueint;
+	if(item == NULL){
+		printf(" No regular TCP port, but can still continue.\n");
+	}else{
+		settings.port_TCP= item->valueint;
+	}
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "payload_sizeUDP");
 	//printf("the %s is %d\n", item->string, item->valueint);
-	settings.payload_size= item->valueint;
 	if(item== NULL){
 		settings.payload_size = 1000;
-        }
+        }else{
+		settings.payload_size= item->valueint;
+	}
 
 
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "measure_time");
 	//printf("the %s is %d\n", item->string, item->valueint);
-	settings.measure_time= item->valueint;
 	if(item== NULL){
 		settings.measure_time= 15;
-        }
+        }else{
+		settings.measure_time= item->valueint;
+	}
 
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "number_of_packets");
 	//printf("the %s is %d\n", item->string, item->valueint);
-	settings.num_of_paks= item->valueint;
 	if(item== NULL){
 		settings.num_of_paks= 6000;
+	}else{
+		settings.num_of_paks= item->valueint;
 	}
 
 
 	item= cJSON_GetObjectItemCaseSensitive(json, "ttl");
-	settings.timeTL= item->valueint;
 	if(item == NULL){
 		settings.timeTL= 255;
+	}else{
+		settings.timeTL= item->valueint;
 	}
 	cJSON_Delete(json);
 
@@ -146,9 +184,43 @@ int main(int argc, char *argv[]){
 	int tcp_sinHead= config.port_sinHead;
 	int tcp_sinTail= config.port_sinTail;
 	//TCP reg might not needed
-	int tcp_regPort= config.port_TCP;
+	//int tcp_regPort= config.port_TCP;
 	int payload= config.payload_size;
 	int inter_measure_time= config.measure_time;
 	int number_of_packets= config.num_of_paks;
 	int timeToLive= config.timeTL;
+
+
+	struct udpPacket{
+		int length;
+		char bytes[payload];
+	};
+
+
+	//Creating UDP connection to send Packets
+	int sockUDP;
+
+	if( (sockUDP = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
+		perror("Unable to create UDP socket\n");
+		exit(EXIT_FAILURE);
+	}
+
+	struct sockaddr_in serveraddr, clientaddr;
+	
+	memset(&serveraddr, 0, sizeof(serveraddr));
+	memset(&clientaddr, 0, sizeof(clientaddr));
+	serveraddr.sin_family = AF_INET;
+	serveraddr.sin_port = htons(udp_dest_port);
+	serveraddr.sin_addr.s_addr= inet_addr(serverip);
+
+	clientaddr.sin_family = AF_INET;
+	clientaddr.sin_port = htons(udp_source_port);
+	clientaddr.sin_addr.s_addr = inet_addr(clientip);
+
+	if(bind(sockUDP, (struct sockaddr *) &clientaddr, sizeof(clientaddr)) <0){
+		perror("Unable to Bind to UDP socket");
+		exit(EXIT_FAILURE);
+	}
+
+
 }
