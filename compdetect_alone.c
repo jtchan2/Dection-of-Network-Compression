@@ -222,5 +222,26 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
+	struct udpPacket *low_entropy = (struct udpPacket *) malloc (number_of_packets * sizeof(struct udpPacket));
+	struct udpPacket *high_entropy = (struct udpPacket *) malloc (number_of_packets * sizeof(struct udpPacket));
+
+	//creating low entropy packets
+	unsigned short id=0;
+	for( int i=0; i<number_of_packets; i++){
+		low_entropy[i].length = payload;
+		for( int j=0; j<(payload -2); j++){
+			low_entropy[i].bytes[j]= 0; 
+		}
+
+		char packid[2];
+		packid[0]=id%256;
+		packid[1]=id/256;
+		id++;
+
+		char * packetpayload = (char *) malloc(strlen(low_entropy[i].bytes)+ strlen(packid)+1);
+		strcpy(packetpayload, packid);
+		strcat(packetpayload, low_entropy[i].bytes);
+		strcpy(low_entropy[i].bytes, packetpayload);
+	}
 
 }
