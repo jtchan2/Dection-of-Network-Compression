@@ -9,5 +9,5 @@
 	"payload_sizeUDP":1000,
 	"measure_time":15,
 	"number_of_packets":6000,
-	"ttl": 255
+	"ttl": 200
 }

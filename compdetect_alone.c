@@ -244,4 +244,60 @@ int main(int argc, char *argv[]){
 		strcpy(low_entropy[i].bytes, packetpayload);
 	}
 
+	unsigned char rngRandomData[payload];
+	unsigned int rngData = open("rng", O_RDONLY);
+	read(rngData, rngRandomData, payload);
+	close(rngData);
+
+	id=0;
+	for(int i=0; i<number_of_packets; i++){
+		high_entropy[i].length = payload;
+		for(int j=0; j< (payload-2); j++){
+			high_entropy[i].bytes[j]=rngRandomData[j];
+		}
+
+		char packid[2];
+		packid[0]=id%256;
+		packid[1]=id/256;
+		id++;
+
+		char * packetpayload = (char *) malloc(strlen(high_entropy[i].bytes)+ strlen(packid) + 1);
+		strcpy(packetpayload, packid);
+		strcat(packetpayload, high_entropy[i].bytes);
+		strcpy(high_entropy[i].bytes, packetpayload);
+	}
+
+	int frag = IP_PMTUDISC_DO;
+
+	if( setsockopt(sockUDP, IPPROTO_IP, IP_MTU_DISCOVER, &frag, sizeof(frag)) <0){
+		printf("Could not set do not fragment of packets ending now\n");
+		exit(1);
+	}
+
+	//setting TTL of packets
+	if( setsockopt(sockUDP, IPPROTO_IP, IP_TTL, &timeToLive, sizeof(timeToLive)) <0){
+		printf("Not able to set ttl of UDP packets. Ending now \n");
+		exit(1);
+	}
+
+	// now sending low packets
+	printf("now sending low packets\n");
+	for(int i =0; i< number_of_packets; i++){
+		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+	}
+	printf("Lows packets Sent\n");
+	printf("Now sleeping\n");
+	sleep(inter_measure_time);
+	printf("Now sending high data\n");
+
+	for(int i=0; i< number_of_packets; i++){
+		sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+	}
+
+	printf("High packet sent\n");
+
+	free(low_entropy);
+	free(high_entropy);
+	close(sockUDP);
+
 }
