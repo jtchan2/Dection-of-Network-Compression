@@ -150,14 +150,14 @@ int main(int argc, char *argv[]){
 	int size_payload=config.payload_size;
 	int pause=config.measure_time;
 
-
+	//structure of a packet for UDP sending
 	struct packet{
 		int length;
 		char bytes[size_payload];
 	};
 	char msg[256];
 
-
+	//created preprobe socket
 	if( (preprobe_socket = socket(AF_INET, SOCK_STREAM, 0))<0){
 		perror("Unable to create Pre-probe Socket");
 		exit(1);
@@ -173,6 +173,7 @@ int main(int argc, char *argv[]){
 	serveraddr.sin_port=htons(port);
 	serveraddr.sin_addr.s_addr= inet_addr(ip);
 
+	//Connecting to server 
 	int status = connect(preprobe_socket, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	if(status <0){
 		perror("Unable to connect to server");
@@ -199,12 +200,13 @@ int main(int argc, char *argv[]){
 	port = config.destinationUDP_port;
 	serveraddr.sin_port= htons(port);
 
+	//created UDP socket
 	if( (sockUDP = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
 		perror("Unable to create Probing UDP socket");
 		exit(1);
 	}
 
-	//attempting to chagne binding port of client
+	//Sett bindings for client udp 
 	struct sockaddr_in server_address, client_address;
 	
 	memset(&server_address, 0, sizeof(server_address));
@@ -218,6 +220,7 @@ int main(int argc, char *argv[]){
 	client_address.sin_port = htons(port);
 	client_address.sin_addr.s_addr = inet_addr(clientip);
 
+	//binds ip to socket
 	if(bind(sockUDP, (struct sockaddr *) &client_address, sizeof(client_address))<0){
 		perror("Unable to Bind UDP socket");
 		exit(1);
@@ -236,7 +239,7 @@ int main(int argc, char *argv[]){
 			low_entropy[i].bytes[j]=0;
 		}
 
-		
+		//correctly sets id of packet
 		char packid[2];
 		packid[0]=id%256;
 		packid[1]=id/256;
@@ -253,8 +256,7 @@ int main(int argc, char *argv[]){
 	}
 
 
-	//high entropy packet making
-	//
+	//high entropy packet making, gets data from urandom file called rng
 	unsigned char rngRandomData[size_payload];
 
 	unsigned int rngData = open("rng", O_RDONLY);
@@ -290,7 +292,7 @@ int main(int argc, char *argv[]){
 		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 		usleep(100);
 	}
-	printf("packets sent\n");
+	printf("low packets sent\n");
 
 	printf("Pausing to split UDP low packet data to send high entropy 'data'\n");
 	sleep(pause);
@@ -309,6 +311,7 @@ int main(int argc, char *argv[]){
 	
 	printf("starting post probe TCP\n");
 
+	//creating TCP post probe socket
 	int postprobe_socket;
 
 	port = config.port_TCP;
@@ -318,7 +321,7 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
-	
+	//setting client socket to connect to
 	int PostprobeServer_sock;
 	if( connect(postprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("COULD NOT CONNECT POST PROBE TCP SOCKET");
@@ -328,6 +331,7 @@ int main(int argc, char *argv[]){
 	
 	char timed[256];
 	int n;
+	//receiving comp dect message from server
 	if( (n=recv(postprobe_socket,&timed, sizeof(timed), 0)) <0){
 		perror("unable to Recieve message from Post Phase TCP");
 		exit(1);
