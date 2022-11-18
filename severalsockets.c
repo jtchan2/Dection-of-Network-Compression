@@ -258,14 +258,12 @@ int main(int argc, char *argv[]){
         }
 
 
-	char * packet= "Packet";
-
 	printf("Now Sending Low entropy data packets\n");
 	for( int i=0; i<num_of_packets; i++){
 		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 		usleep(100);
 	}
-	printf("packet sent\n");
+	printf("packets sent\n");
 
 	printf("Pausing to split UDP low packet data to send high entropy 'data'\n");
 	sleep(pause);
