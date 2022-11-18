@@ -135,7 +135,7 @@ int main(int argc, char *argv[]){
 		perror("Unable to create Pre-probe Socket");
 		exit(EXIT_FAILURE);
 	}
-	int port = 8756;
+	int port;
 	char *ip = config.server_ip;
 	char *clientip= config.client_ip;
 	struct sockaddr_in serveraddr;
