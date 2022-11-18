@@ -14,7 +14,8 @@ commands into your terminal, make sure to have both cJSON.h and cJSON.c in direc
 
 
 To run code you would first do: ./severalsocketServer configserve.json
- on your server VM or machine then you do: ./severalsocket config.json 
+ on your server VM or machine 
+then you do: ./severalsocket config.json 
 on your client vm or machine 
 
 (3) Incomplete/ explanation
@@ -22,3 +23,5 @@ In my code there is on error where the client UDP packet sending finishes before
 
 Design choice:
 I have moved the socket creating for post TCP right after UDP port bidning to ensure that when the client finishes sending packets to the server, it can connect to a TCP port and wait to receive infomation instead of hitting a connection refused error for when it would try to connect before post TCP socket would be created.
+
+When filtering Project1PacketCaputre.pcap, use filter ip.addr==192.168.86.248 || ip.addr==192.168.86.249 to see TCP and UDP packet sending
