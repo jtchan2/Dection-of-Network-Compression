@@ -89,7 +89,7 @@ int main (int argc, char *argv[]){
 	
 	if( (preprobe_socket= socket(AF_INET, SOCK_STREAM, 0))<0){
 		perror("Unable to create pre probing Socket");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 	int port;
 	char * ip= config.server_ip;
@@ -104,7 +104,7 @@ int main (int argc, char *argv[]){
 	setsockopt(preprobe_socket, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
 	if( bind(preprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("Unable to bind pre probing socket");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 
 	listen(preprobe_socket, 5);
@@ -116,7 +116,7 @@ int main (int argc, char *argv[]){
 
 	if( (ppclient_socket = accept(preprobe_socket, (struct sockaddr*) &client_addr, &addr_size)) <0){
 		perror("Unable to accept Pre probing SOcket");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 	char destination_UDP[256];
 	char port_TCP[256];
@@ -126,7 +126,7 @@ int main (int argc, char *argv[]){
 
 	if( (n = recv (ppclient_socket, destination_UDP, sizeof(destination_UDP), 0))<0){
 		perror("Unable to recieve message from Pre Probe socket");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 
 	// Setting of variables after reading/ receiving information from client
@@ -151,8 +151,6 @@ int main (int argc, char *argv[]){
 
 	printf("Starting Probing UDP phase\n");
 
-	signal(SIGTERM, cleanExit);
-	signal(SIGINT, cleanExit);
 
 	// socket to be used for UDp packet sending
 	int sockUDP;
@@ -160,7 +158,7 @@ int main (int argc, char *argv[]){
 	
 	memset(&serveraddrUDP, 0, sizeof(serveraddrUDP));
 	memset(&clientaddrUDP, 0, sizeof(clientaddrUDP));
-	port = 8765;
+	
 	serveraddrUDP.sin_family = AF_INET;
 	serveraddrUDP.sin_port= htons(port);
 	serveraddrUDP.sin_addr.s_addr=inet_addr(ip);
@@ -168,7 +166,7 @@ int main (int argc, char *argv[]){
 
 	if( (sockUDP= socket(AF_INET, SOCK_DGRAM, 0))<0){
 		perror("Unable to create UDP socket");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 
 	
@@ -178,7 +176,7 @@ int main (int argc, char *argv[]){
 	printf("created UDP socket\n");
 	if ( bind(sockUDP, (const struct sockaddr *) &serveraddrUDP, sizeof(serveraddrUDP))< 0){
 		perror("Not able to bind UDP socket");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 	printf("Binded Socket\n");
 
@@ -190,7 +188,7 @@ int main (int argc, char *argv[]){
 	port= atoi(port_TCP);
 	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
                 perror("Unable to connect Post Probing TCP socket");
-                exit(EXIT_FAILURE);
+                exit(1);
         }
 
 
@@ -198,12 +196,12 @@ int main (int argc, char *argv[]){
 
         if( bind(post_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
                 perror("Unable to Bind Post probing TCP");
-                exit(EXIT_FAILURE);
+                exit(1);
         }
 	int checkycheck;
         if((checkycheck=listen(post_sock, 5))<0){
                 perror("Not able to listen for Post Probing Phase TCP");
-                exit(EXIT_FAILURE);
+                exit(1);
         }
 
 	
@@ -266,7 +264,7 @@ int main (int argc, char *argv[]){
 		
 	if((client_sockPost= accept(post_sock, (struct sockaddr*) &client_addr, &addr_size))<0){
 		perror("Not able to Accept for Post Probing pahse TCP");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 	
 	
@@ -274,7 +272,7 @@ int main (int argc, char *argv[]){
 	bytez =send(client_sockPost, (char *)mille, strlen(mille), 0);
 	if(bytez<1){
 		printf("Nothing was sent\n");
-		
+
 	}
 	printf("Sent Client time results\n");
 	printf("ending post probing phase\n");
@@ -282,4 +280,4 @@ int main (int argc, char *argv[]){
 	close(client_sockPost);
 	
 	return 0;
-}	
+}		
