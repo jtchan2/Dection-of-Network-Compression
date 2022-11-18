@@ -21,8 +21,16 @@ instructions cJSON_make_struct(char* file, instructions settings){
 	cJSON *json, *item;
 	json = cJSON_Parse(file);
 	item = cJSON_GetObjectItemCaseSensitive(json, "server_ip");
+	if(item == NULL){
+		printf("server Ip address not included in configserve.json please include");
+		exit(1);
+	}
 	strcpy(settings.server_ip, item->valuestring);
 	item = cJSON_GetObjectItemCaseSensitive(json, "port_TCP");
+	if(item == NULL){
+		printf("Missing TCP port in configserve.json please include\n");
+		exit(1);
+	}
 	settings.port_TCP= item->valueint;
 
 	cJSON_Delete(json);
