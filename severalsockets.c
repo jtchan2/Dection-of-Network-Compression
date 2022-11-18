@@ -32,39 +32,67 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	//TODO MAKE item stuff go into settings	
 	item = cJSON_GetObjectItemCaseSensitive(json, "server_ip_address");
 	//printf("getobejct got : %s\n", item->string);
+	if( item == NULL){
+		printf("Missing server Ip address, please include in config.json\n");
+		exit(1);
+	}
 	strcpy(settings.server_ip, item->valuestring);
 
 	item =cJSON_GetObjectItemCaseSensitive(json, "client_ip_address");
+	if(item == NULL){
+		printf("Missing CLient Ip address, please include in config.json\n");
+		exit(1);
+	}
 	strcpy(settings.client_ip, item->valuestring);
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "sourceport_UDP");
 	//printf("getobject got string %s, int value %d\n", item->string, item->valueint);
+	if(item == NULL){
+		printf("Missing UDP source port info in config.json, please include\n");
+		exit(1);
+	}
 	settings.sourceUDP_port=item->valueint;
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "destinationport_UDP");
 	//printf("the %s is %d\n", item->string, item->valueint);
+	if( item == NULL){
+		printf("Missing UDP destination port please include in config.json\n");
+		exit(1);
+	}
 	settings.destinationUDP_port=item->valueint;
 	
 	item = cJSON_GetObjectItemCaseSensitive(json, "port_TCP");
 	//printf("the %s is %d\n", item->string, item->valueint);
+	if( item == NULL){
+		printf("Missing TCP port in config.json, please include\n");
+		exit(1);
+	}
 	settings.port_TCP= item->valueint;
 	
 	item = cJSON_GetObjectItemCaseSensitive(json, "payload_sizeUDP");
 	//printf("the %s is %d\n", item->string, item->valueint);
-	settings.payload_size= item->valueint;
+	if(item == NULL){
+		settings.payload_size = 1000;
+	}else{
+		settings.payload_size= item->valueint;
+	}
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "measure_time");
 	//printf("the %s is %d\n", item->string, item->valueint);
-	settings.measure_time= item->valueint;
+	if(item == NULL){
+		settings.measure_time = 15;
+	}else{
+		settings.measure_time= item->valueint;
+	}
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "number_of_packets");
 	//printf("the %s is %d\n", item->string, item->valueint);
-	settings.num_of_paks= item->valueint;
-
-	item= cJSON_GetObjectItemCaseSensitive(json, "ttl");
 	if(item == NULL){
-		printf("COuld not find item\n");
+		settings.num_of_paks=6000;
+	}else{
+		settings.num_of_paks= item->valueint;
 	}
+
 	cJSON_Delete(json);
 
 	return settings;
@@ -279,7 +307,6 @@ int main(int argc, char *argv[]){
 	free(low_entropy);
 	free(high_entropy);
 	close(sockUDP);
-	//shutdown(sockUDP, 1);
 	
 	printf("starting post probe TCP\n");
 
@@ -295,7 +322,7 @@ int main(int argc, char *argv[]){
 	
 	int PostprobeServer_sock;
 	if( connect(postprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
-		perror("COUKD NOT CONNECT POST PROBE TCP SOCKET");
+		perror("COULD NOT CONNECT POST PROBE TCP SOCKET");
 		exit(1);
 	}
 
@@ -307,7 +334,7 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	timed[n]='\0';
-	printf("Time : %s\n", timed);
+	printf("Result : %s\n", timed);
 
 	printf("ENDING TCP POST PROBE CONNECTION\n");
 	close(postprobe_socket);
