@@ -28,10 +28,9 @@ typedef struct
 instructions cJSON_make_struct( char * file, instructions settings){
 	cJSON *json, *item, *object;
 	json = cJSON_Parse(file);
-	//add error catchers later
-	//TODO MAKE item stuff go into settings	
+		
 	item = cJSON_GetObjectItemCaseSensitive(json, "server_ip_address");
-	//printf("getobejct got : %s\n", item->string);
+	
 	if( item == NULL){
 		printf("Missing server Ip address, please include in config.json\n");
 		exit(1);
@@ -46,7 +45,7 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	strcpy(settings.client_ip, item->valuestring);
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "sourceport_UDP");
-	//printf("getobject got string %s, int value %d\n", item->string, item->valueint);
+
 	if(item == NULL){
 		printf("Missing UDP source port info in config.json, please include\n");
 		exit(1);
@@ -54,7 +53,7 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	settings.sourceUDP_port=item->valueint;
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "destinationport_UDP");
-	//printf("the %s is %d\n", item->string, item->valueint);
+	
 	if( item == NULL){
 		printf("Missing UDP destination port please include in config.json\n");
 		exit(1);
@@ -62,7 +61,7 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	settings.destinationUDP_port=item->valueint;
 	
 	item = cJSON_GetObjectItemCaseSensitive(json, "port_TCP");
-	//printf("the %s is %d\n", item->string, item->valueint);
+	
 	if( item == NULL){
 		printf("Missing TCP port in config.json, please include\n");
 		exit(1);
@@ -70,7 +69,7 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	settings.port_TCP= item->valueint;
 	
 	item = cJSON_GetObjectItemCaseSensitive(json, "payload_sizeUDP");
-	//printf("the %s is %d\n", item->string, item->valueint);
+	
 	if(item == NULL){
 		settings.payload_size = 1000;
 	}else{
@@ -78,7 +77,7 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	}
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "measure_time");
-	//printf("the %s is %d\n", item->string, item->valueint);
+	
 	if(item == NULL){
 		settings.measure_time = 15;
 	}else{
@@ -86,7 +85,7 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	}
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "number_of_packets");
-	//printf("the %s is %d\n", item->string, item->valueint);
+	
 	if(item == NULL){
 		settings.num_of_paks=6000;
 	}else{
