@@ -9,6 +9,18 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <netinet/ip.h> 
+#include <netinet/ip.h>
+#include <sys/ioctl.h>
+#include <bits/ioctls.h>
+#include <net/if.h>
+#include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include <net/ethernet.h>
+#include <pcap.h>
+#include <ctype.h>
+#include <sys/wait.h>
+#include <time.h>
 #include "cJSON.h"
 
 typedef struct
@@ -26,13 +38,19 @@ typedef struct
 	int timeTL;
 }instructions;
 
+struct pseudo_header
+{
+  u_int32_t source_address;
+  u_int32_t dest_address;
+  u_int8_t placeholder;
+  u_int8_t protocol;
+  u_int16_t tcp_length;
+};
+
 instructions cJSON_make_struct( char * file, instructions settings){
 	cJSON *json, *item, *object;
 	json = cJSON_Parse(file);
-	//add error catchers later
-	//TODO MAKE item stuff go into settings
 	item = cJSON_GetObjectItemCaseSensitive(json, "server_ip_address");
-	//printf("getobejct got : %s\n", item->string);
 	if(item== NULL){
 		printf("Missing server ip addreess. Please include in config file. Exiting now\n");
 		exit(0);
@@ -48,7 +66,6 @@ instructions cJSON_make_struct( char * file, instructions settings){
 		strcpy(settings.client_ip, item->valuestring);
 	}
 	item = cJSON_GetObjectItemCaseSensitive(json, "sourceport_UDP");
-	//printf("getobject got string %s, int value %d\n", item->string, item->valueint);
 	if(item == NULL){
 		printf("Missing source UDP prot in config file. Please include. Now Exiting \n");
 		exit(0);
@@ -57,7 +74,6 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	}
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "destinationport_UDP");
-	//printf("the %s is %d\n", item->string, item->valueint);
 	if(item == NULL){
 		printf("Missing UDP destination port in config file. please include. Exiting now\n");
 		exit(0);
@@ -83,7 +99,6 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	}
 	
 	item = cJSON_GetObjectItemCaseSensitive(json, "port_TCP");
-	//printf("the %s is %d\n", item->string, item->valueint);
 	if(item == NULL){
 		printf(" No regular TCP port, but can still continue.\n");
 	}else{
@@ -91,7 +106,6 @@ instructions cJSON_make_struct( char * file, instructions settings){
 	}
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "payload_sizeUDP");
-	//printf("the %s is %d\n", item->string, item->valueint);
 	if(item== NULL){
 		settings.payload_size = 1000;
         }else{
@@ -101,7 +115,6 @@ instructions cJSON_make_struct( char * file, instructions settings){
 
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "measure_time");
-	//printf("the %s is %d\n", item->string, item->valueint);
 	if(item== NULL){
 		settings.measure_time= 15;
         }else{
@@ -110,7 +123,6 @@ instructions cJSON_make_struct( char * file, instructions settings){
 
 
 	item = cJSON_GetObjectItemCaseSensitive(json, "number_of_packets");
-	//printf("the %s is %d\n", item->string, item->valueint);
 	if(item== NULL){
 		settings.num_of_paks= 6000;
 	}else{
@@ -183,8 +195,6 @@ int main(int argc, char *argv[]){
 	int udp_dest_port= config.destinationUDP_port;
 	int tcp_sinHead= config.port_sinHead;
 	int tcp_sinTail= config.port_sinTail;
-	//TCP reg might not needed
-	//int tcp_regPort= config.port_TCP;
 	int payload= config.payload_size;
 	int inter_measure_time= config.measure_time;
 	int number_of_packets= config.num_of_paks;
@@ -195,6 +205,9 @@ int main(int argc, char *argv[]){
 		int length;
 		char bytes[payload];
 	};
+
+	//Creating TCP SYN packets
+	
 
 
 	//Creating UDP connection to send Packets
