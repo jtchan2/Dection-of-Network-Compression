@@ -91,6 +91,7 @@ int main (int argc, char *argv[]){
 	
 	
 	int preprobe_socket;
+	// item used to set dont fragment and reuse sock addr
 	int frag = IP_PMTUDISC_DO;
 	
 	printf("Starting Pre Probing TCP phase\n");
@@ -103,6 +104,7 @@ int main (int argc, char *argv[]){
 	char * ip= config.server_ip;
 	struct sockaddr_in serveraddr;
 
+	//sets and allocate memory for TCP
 	port = config.port_TCP;
 	memset(&serveraddr, 0, sizeof(serveraddr));	
 	serveraddr.sin_family = AF_INET;
@@ -117,6 +119,7 @@ int main (int argc, char *argv[]){
 
 	listen(preprobe_socket, 5);
 
+	//create client socket for TCP pre probe to receive data from
 	int ppclient_socket;
 	struct sockaddr_storage client_addr;
 	socklen_t addr_size;
@@ -146,7 +149,7 @@ int main (int argc, char *argv[]){
 	n=recv(ppclient_socket, numOfPaks, sizeof(numOfPaks), 0);
 	numOfPaks[n]='\0';
 
-	
+	// converts received items into local variable
 	port = atoi(destination_UDP);
 	int size_payload = atoi(paySize);
 	char bytes[size_payload];
@@ -160,7 +163,7 @@ int main (int argc, char *argv[]){
 	printf("Starting Probing UDP phase\n");
 
 
-	// socket to be used for UDp packet sending
+	// socket to be used for UDp packet sending, set memory fro addresses
 	int sockUDP;
 	struct sockaddr_in serveraddrUDP, clientaddrUDP;
 	
@@ -178,7 +181,7 @@ int main (int argc, char *argv[]){
 	}
 
 	
-
+	//makes packets to not fragment
 	setsockopt(sockUDP, IPPROTO_IP, IP_MTU_DISCOVER, &frag, sizeof(frag));
 	
 	printf("created UDP socket\n");
@@ -186,12 +189,13 @@ int main (int argc, char *argv[]){
 		perror("Not able to bind UDP socket");
 		exit(1);
 	}
+
 	printf("Binded Socket\n");
 
 	printf("Now Receiving Low Entropy packets\n");
 
 
-	// create Post TCP here
+	// create Post TCP here So that client doesnt conenct to a socket that isnt open yet
 	int post_sock;
 	port= atoi(port_TCP);
 	if( (post_sock = socket (AF_INET, SOCK_STREAM, 0))<0){
@@ -199,13 +203,14 @@ int main (int argc, char *argv[]){
                 exit(1);
         }
 
-
+	//Allow for reuse of port address
         setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
 
         if( bind(post_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
                 perror("Unable to Bind Post probing TCP");
                 exit(1);
         }
+
 	int checkycheck;
         if((checkycheck=listen(post_sock, 5))<0){
                 perror("Not able to listen for Post Probing Phase TCP");
@@ -215,7 +220,7 @@ int main (int argc, char *argv[]){
 	
 
 
-// tcp created here 
+// UDP packet receiving  here 
 
 	clock_t timer;
 	
@@ -275,7 +280,7 @@ int main (int argc, char *argv[]){
 		exit(1);
 	}
 	
-	
+	//sending results of packet receiving to Client
 	int bytez;
 	bytez =send(client_sockPost, (char *)mille, strlen(mille), 0);
 	if(bytez<1){
