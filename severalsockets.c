@@ -278,6 +278,8 @@ int main(int argc, char *argv[]){
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
+	free(low_entropy);
+	free(high_entropy);
 	close(sockUDP);
 	//shutdown(sockUDP, 1);
 	
