@@ -133,7 +133,7 @@ int main(int argc, char *argv[]){
 
 	if( (preprobe_socket = socket(AF_INET, SOCK_STREAM, 0))<0){
 		perror("Unable to create Pre-probe Socket");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 	int port;
 	char *ip = config.server_ip;
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]){
 	int status = connect(preprobe_socket, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	if(status <0){
 		perror("Unable to connect to server");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 	
 	//Sending config information to the server
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]){
 
 	if( (sockUDP = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
 		perror("Unable to create Probing UDP socket");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 
 	//attempting to chagne binding port of client
@@ -193,11 +193,11 @@ int main(int argc, char *argv[]){
 
 	if(bind(sockUDP, (struct sockaddr *) &client_address, sizeof(client_address))<0){
 		perror("Unable to Bind UDP socket");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 
 	
-
+	//creating Packet Phase
 	struct packet *low_entropy = (struct packet *) malloc (num_of_packets * sizeof(struct packet));
 
 	struct packet *high_entropy = (struct packet *)malloc (num_of_packets * sizeof(struct packet));
@@ -289,14 +289,14 @@ int main(int argc, char *argv[]){
 	serveraddr.sin_port= htons(port);
 	if( (postprobe_socket = socket (AF_INET, SOCK_STREAM, 0))<0){
 		perror("COULD NOT CREATE POST PROBE PHASE SOCKET TCP");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 
 	
 	int PostprobeServer_sock;
 	if( connect(postprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("COUKD NOT CONNECT POST PROBE TCP SOCKET");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 
 	
@@ -304,7 +304,7 @@ int main(int argc, char *argv[]){
 	int n;
 	if( (n=recv(postprobe_socket,&timed, sizeof(timed), 0)) <0){
 		perror("unable to Recieve message from Post Phase TCP");
-		exit(EXIT_FAILURE);
+		exit(1);
 	}
 	timed[n]='\0';
 	printf("Time : %s\n", timed);
