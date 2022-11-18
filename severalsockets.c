@@ -221,7 +221,7 @@ int main(int argc, char *argv[]){
 	client_address.sin_addr.s_addr = inet_addr(clientip);
 
 	int frag = IP_PMTUDISC_DO;
-	setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
+	setsockopt(sockUDP, IPPROTO_IP, IP_MTU_DISCOVER &frag, sizeof(frag));
 	//binds ip to socket
 	if(bind(sockUDP, (struct sockaddr *) &client_address, sizeof(client_address))<0){
 		perror("Unable to Bind UDP socket");
