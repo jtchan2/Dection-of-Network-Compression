@@ -153,13 +153,13 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
   	int src_port = ntohs(tcp->th_sport);
   	int dst_port = ntohs(tcp->th_dport);
 
-  	if(count == 2 && src_port == 8000 && dst_port == 5000){
+  	if(count == 2 && src_port == 8000 && dst_port == 8080){
 		low_start = clock();
-  	}else if(count == 3 && src_port == 8001 && dst_port == 5000){
+  	}else if(count == 3 && src_port == 8001 && dst_port == 8080){
 		low_end = clock();
-  	}else if(count == 4 && src_port == 8000 && dst_port == 5000){
+  	}else if(count == 4 && src_port == 8000 && dst_port == 8080){
     		high_start = clock();
-  	}else if(count == 5 && src_port == 8001 && dst_port == 5000){
+  	}else if(count == 5 && src_port == 8001 && dst_port == 8080){
    		 high_end = clock();
   	}
 	return;
@@ -450,7 +450,7 @@ int main(int argc, char *argv[]){
 	char errbuf[PCAP_ERRBUF_SIZE];    /* error buffer for pcap */
 
 	 //Filter for recieving tcp packets from server with rst set
-	char filter_exp[] = "(tcp port (5000 or 8000 or 8001)) and (tcp[tcpflags] & (tcp-rst) == (tcp-rst))";   /* filter expression [3] */
+	char filter_exp[] = "(tcp port (8080 or 8000 or 8001)) and (tcp[tcpflags] & (tcp-rst) == (tcp-rst))";   /* filter expression [3] */
 	struct bpf_program fp;      /* compiled filter program (expression) */
 	bpf_u_int32 mask;     /* subnet mask */
 	bpf_u_int32 net;      /* ip */
