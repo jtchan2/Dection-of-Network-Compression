@@ -514,12 +514,13 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	// Seetting Destination MAC addr
-	dst_mac[0] = 0xb0;	//origin 0x00
-	dst_mac[1] = 0xb9;	//0x0c
-	dst_mac[2] = 0x8a;	//0x29
-	dst_mac[3] = 0x77;	//0x2e
-	dst_mac[4] = 0x33;	//0xee
-	dst_mac[5] = 0x5a;	//0x26
+	// This is Mac address of vm bridge adapter settings i.e. vm connection
+	dst_mac[0] = 0x08;	
+	dst_mac[1] = 0x00;	
+	dst_mac[2] = 0x27;	
+	dst_mac[3] = 0x1f;	
+	dst_mac[4] = 0xc6;	
+	dst_mac[5] = 0xb3;	
 	//May need to change
 	//b0:b9:8a:77:33:5a
 	//or 08:00:27:1f:c6:b3
