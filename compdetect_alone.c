@@ -444,7 +444,7 @@ int main(int argc, char *argv[]){
 	int time = inter_measure_time;
 
 	 //Interface to send packets 
-	strcpy(interface, "ens33");
+	strcpy(interface, "enp0s3");
 
 	 //Now Setting up packet sniffing
 	char errbuf[PCAP_ERRBUF_SIZE];    /* error buffer for pcap */
@@ -522,6 +522,7 @@ int main(int argc, char *argv[]){
 	dst_mac[5] = 0x5a;	//0x26
 	//May need to change
 	//b0:b9:8a:77:33:5a
+	//or 08:00:27:1f:c6:b3
 	
 	//Source ipv4 addr
 	strcpy(src_ip, config.client_ip);
