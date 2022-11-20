@@ -641,10 +641,17 @@ int main(int argc, char *argv[]){
 
 	// Transport layer protocol
 	iphdr.ip_p = IPPROTO_TCP;
-
+	
+	//Source IPv4 address
 	if((status = inet_pton(AF_INET, dst_ip, &(iphdr.ip_src))) !=1){
 		fprintf(stderr, "inet_pton failed. \n Error message: %s", strerror(status));
 		exit(EXIT_FAILURE);
+	}
+
+	//Destination IPv4 address
+	if((status = inet_pton(AF_INET, dst_ip, &(iphdr.ip_dst))) !=1){
+		fprintf (stderr, "inet_pton failed.\nError message: %s", strerror (status));
+    exit(EXIT_FAILURE);
 	}
 
 	// ipv4 header checksum, init to 0
@@ -686,7 +693,7 @@ int main(int argc, char *argv[]){
 	struct pseudo_header psh;
 
 	//populate pseudo ip header
-	psh.source_address = inet_addr(clientip);
+	psh.source_address = inet_addr(clientip); // may need to change
 	psh.dest_address = ipv4->sin_addr.s_addr;
 	psh.placeholder = 0;
 	psh.protocol = IPPROTO_TCP;
