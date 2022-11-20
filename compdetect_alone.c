@@ -672,7 +672,7 @@ int main(int argc, char *argv[]){
 	//TCP header
 	memset(&tcphdr, 0, sizeof(tcphdr));
 
-	tcphdr.th_sport = htons(htons(probe_tcp)); // set source port
+	tcphdr.th_sport = htons(probe_tcp); // set source port
 	
 	tcphdr.th_dport = htons(tcp_sinHead);
 

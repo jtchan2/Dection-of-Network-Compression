@@ -1,6 +1,6 @@
 {
 	"server_ip_address":"10.0.2.15",
-	"client_ip_address":"192.168.0.54",
+	"client_ip_address":"192.168.0.56",
 	"sourceport_UDP":9876,
 	"destinationport_UDP":8765,
 	"TCP_Head_Syn": 8000,
