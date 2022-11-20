@@ -645,7 +645,7 @@ int main(int argc, char *argv[]){
 	iphdr.ip_p = IPPROTO_TCP;
 	
 	//Source IPv4 address
-	if((status = inet_pton(AF_INET, dst_ip, &(iphdr.ip_src))) !=1){
+	if((status = inet_pton(AF_INET, src_ip, &(iphdr.ip_src))) !=1){
 		fprintf(stderr, "inet_pton failed. \n Error message: %s", strerror(status));
 		exit(EXIT_FAILURE);
 	}
