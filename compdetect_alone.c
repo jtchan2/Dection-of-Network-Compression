@@ -523,13 +523,15 @@ int main(int argc, char *argv[]){
 	dst_mac[5] = 0xb3;	
 	//May need to change
 	//b0:b9:8a:77:33:5a
-	//or 08:00:27:1f:c6:b3
+	//or 08:00:27:1f:c6:b3  | ip addr of old = 198.168.86.248
+	//third vm mac 08:00:27:ad:f9:f2
 	
 	//Source ipv4 addr
 	strcpy(src_ip, config.client_ip);
-
+	printf("client addr: %s\n", config.client_ip);
 	//Destiantion Ipv4 addr
 	strcpy(target, config.server_ip);
+	printf("server addr: %s\n", config.server_ip);
 	// fill out hints for getaddrinfo()
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_INET;
