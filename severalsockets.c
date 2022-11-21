@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include "cJSON.h"
 
+#define MAX_PAYLOAD_SIZE 2000
 typedef struct
 {
 	char server_ip[100];
@@ -155,6 +156,12 @@ int main(int argc, char *argv[]){
 		int length;
 		char bytes[size_payload];
 	};
+	struct pak{
+		char byte_0_id;
+		char byte_1_id;
+		char payload[MAX_PAYLOAD_SIZE];
+	};
+	char buffer[3000];
 	char msg[256];
 
 	//created preprobe socket
@@ -228,6 +235,21 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
+	//New PAcket Creation
+	//possible malloc doing low= (struct packet) malloc(sizeof(packet)
+	/*
+	struct pak *low= (struct pak *)malloc(sizeof(struct pak));
+	memset(&low->payload, 0, MAX_PAYLOAD_SIZE);
+	for(unsigned short int i=0; i<num_of_packets; i++){
+		low->byte_0_id= (uint8_t)(i & 0xff);
+		low->byte_1_id= (uint8_t)(i >> 8);
+		memcpy(buffer, (char *) low, sizeof(low));
+			
+	}
+	*/
+
+
+	//
 	
 	//creating Packet Phase
 	struct packet *low_entropy = (struct packet *) malloc (num_of_packets * sizeof(struct packet));
@@ -235,6 +257,7 @@ int main(int argc, char *argv[]){
 	struct packet *high_entropy = (struct packet *)malloc (num_of_packets * sizeof(struct packet));
 
 	unsigned short id=0;
+	//bit shift ids and add comments
 	for(int i=0; i<num_of_packets; i++){
 		low_entropy[i].length= size_payload;
 		for( int j=0; j< (size_payload -2); j++){
@@ -290,8 +313,15 @@ int main(int argc, char *argv[]){
 
 
 	printf("Now Sending Low entropy data packets\n");
-	for( int i=0; i<num_of_packets; i++){
-		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+	struct pak *low= (struct pak *)malloc(sizeof(struct pak));
+        memset(&low->payload, 0, MAX_PAYLOAD_SIZE);
+
+	for( unsigned short int i=0; i<num_of_packets; i++){
+		low->byte_0_id= (uint8_t)(i & 0xff);
+                low->byte_1_id= (uint8_t)(i >> 8);
+                memcpy(buffer, (char *) low, sizeof(low));
+		sendto(sockUDP,buffer, (size_payload+2), MSG_CONFIRM, (const struct sockaddr*) &server_address, sizeof(server_address));
+		//sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 		usleep(100);
 	}
 	printf("low packets sent\n");
