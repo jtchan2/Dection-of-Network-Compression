@@ -380,10 +380,7 @@ int main(int argc, char *argv[]){
 	dst_mac[3] = 0x1f;	
 	dst_mac[4] = 0xc6;	
 	dst_mac[5] = 0xb3;	
-	//May need to change
-	//b0:b9:8a:77:33:5a
-	//or 08:00:27:1f:c6:b3  | ip addr of old = 198.168.86.248
-	//third vm mac 08:00:27:ad:f9:f2
+	
 	
 	//Source ipv4 addr
 	strcpy(src_ip, config.client_ip);
@@ -536,16 +533,16 @@ int main(int argc, char *argv[]){
 	//frame length
 	int tcp_packet_length = IP4_HDRLEN + TCP_HDRLEN + datalen;
 
-	int s; // scoket file descriptor used for sending tcp packets
+	int sockRaw; // scoket file descriptor used for sending tcp packets
 	
-	if((s = socket(PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0){
+	if((sockRaw = socket(PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0){
 		perror("Failed to create tcp socket");
     		exit(1);
 	}
 
 	// set socket option to include ip header
 	int flag = 1;
-	if(setsockopt (s, IPPROTO_IP, IP_HDRINCL, &flag, sizeof (flag)) < 0){
+	if(setsockopt (sockRaw, IPPROTO_IP, IP_HDRINCL, &flag, sizeof (flag)) < 0){
 
 		perror("Error setting IP_HDRINCL");
 		exit(1);
@@ -554,12 +551,12 @@ int main(int argc, char *argv[]){
 	//copy tcp header information into datagram
 	memcpy(datagram + sizeof(struct iphdr) , &tcphdr, sizeof(struct tcphdr));
 
-	if(sendto (s, datagram, tcp_packet_length , 0, (struct sockaddr *)ipv4, sizeof(struct sockaddr_in)) < 0) {
+	if(sendto (sockRaw, datagram, tcp_packet_length , 0, (struct sockaddr *)ipv4, sizeof(struct sockaddr_in)) < 0) {
 		perror("sendto failed");
 		exit(1);
 	}
 
-	close(s);
+	close(sockRaw);
 
 
 
@@ -698,13 +695,13 @@ int main(int argc, char *argv[]){
 	// calc checksum
 	tcphdr_2.th_sum = checksum((unsigned short*)pseudogram, psize);
 	//create raw tcp socket
-	if((s = socket (PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0){
+	if((sockRaw = socket (PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0){
 		perror("Failed to create tcp socket");
 		exit(1);
 	}
 
 	//set header include (for ip header)
-	if(setsockopt(s, IPPROTO_IP, IP_HDRINCL, &flag, sizeof(flag)) < 0){
+	if(setsockopt(sockRaw, IPPROTO_IP, IP_HDRINCL, &flag, sizeof(flag)) < 0){
 		perror("Error setting IP_HDRINCL");
 		exit(1);
 	}
@@ -713,12 +710,12 @@ int main(int argc, char *argv[]){
 	memcpy(datagram_2 + sizeof(struct ip) , &tcphdr_2, sizeof(struct tcphdr));
 
 	//send datagram
-	if(sendto(s, datagram_2, tcp_packet_length , 0, (struct sockaddr *)ipv4, sizeof(struct sockaddr_in)) < 0) {
+	if(sendto(sockRaw, datagram_2, tcp_packet_length , 0, (struct sockaddr *)ipv4, sizeof(struct sockaddr_in)) < 0) {
 		perror("sendto failed");
 		exit(1);
 	}
 
-	close(s);
+	close(sockRaw);
 
 
 	printf("Now sleeping\n");
@@ -768,13 +765,13 @@ int main(int argc, char *argv[]){
 	tcphdr_3.th_sum = checksum((unsigned short*)pseudogram, psize);
 
 	// create raw sock
-	if((s = socket (PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0){
+	if((sockRaw = socket (PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0){
 	       	perror("Failed to create tcp socket");
 		exit(1);
 	}
 
 	//set header include for ip hdr
-	if(setsockopt(s, IPPROTO_IP, IP_HDRINCL, &flag, sizeof (flag)) < 0){
+	if(setsockopt(sockRaw, IPPROTO_IP, IP_HDRINCL, &flag, sizeof (flag)) < 0){
 		perror("Error setting IP_HDRINCL");
 		exit(1);
 	}
@@ -782,11 +779,11 @@ int main(int argc, char *argv[]){
 	//copy in tcp header information
 	memcpy(datagram_3 + sizeof(struct ip) , &tcphdr_3, sizeof(struct tcphdr));
 
-	if(sendto(s, datagram_3, tcp_packet_length , 0, (struct sockaddr *)ipv4, sizeof(struct sockaddr_in)) < 0) {
+	if(sendto(sockRaw, datagram_3, tcp_packet_length , 0, (struct sockaddr *)ipv4, sizeof(struct sockaddr_in)) < 0) {
 		perror("sendto failed");
 	}
 
-	close(s);
+	close(sockRaw);
 
 
 	printf("Now sending high data\n");
@@ -847,13 +844,13 @@ int main(int argc, char *argv[]){
 	tcphdr_4.th_sum = checksum((unsigned short*)pseudogram, psize);
 
 	//create new raw TCP sock
-	if((s = socket (PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0){
+	if((sockRaw = socket (PF_INET, SOCK_RAW, IPPROTO_TCP)) < 0){
 		perror("Failed to create tcp socket");
 		exit(1);
 	}
 
 	//set header include for ip hdr
-	if(setsockopt (s, IPPROTO_IP, IP_HDRINCL, &flag, sizeof(flag)) < 0){
+	if(setsockopt(sockRaw, IPPROTO_IP, IP_HDRINCL, &flag, sizeof(flag)) < 0){
 		perror("Error setting IP_HDRINCL");
 		exit(1);
 	}
@@ -861,12 +858,12 @@ int main(int argc, char *argv[]){
 	memcpy(datagram_4 + sizeof(struct ip) , &tcphdr_4, sizeof(struct tcphdr));
 	
 	// sending tcp tail 2
-	if(sendto(s, datagram_4, tcp_packet_length , 0, (struct sockaddr *)ipv4, sizeof(struct sockaddr_in)) < 0){
+	if(sendto(sockRaw, datagram_4, tcp_packet_length , 0, (struct sockaddr *)ipv4, sizeof(struct sockaddr_in)) < 0){
 		perror("sendto failed");
 		exit(1);
 	}
 
-	close(s);
+	close(sockRaw);
 
 	
 
