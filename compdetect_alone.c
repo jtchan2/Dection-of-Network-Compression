@@ -560,11 +560,14 @@ int main(int argc, char *argv[]){
 	memcpy(device.sll_addr, dst_mac, 6);
 
 	datalen = 5;
+	data="Head1";
+	/*
 	data[0] = 'H';
 	data[1] = 'e';
 	data[2] = 'a';
 	data[3] = 'd';
 	data[4] = '1';
+	*/
 
 	// TODO POTENTIALLY ADD PACKET SNIFFING FOR RST HERE	
 	
@@ -839,11 +842,14 @@ int main(int argc, char *argv[]){
 	memset(data, 0, IP_MAXPACKET);
 
 	//update data to be tail
+	data = "Tail1";
+	/*
 	data[0] = 'T';
        	data[1] = 'a';
 	data[2] = 'i';
 	data[3] = 'l';
 	data[4] = '1';
+	*/
 
 	struct ip iphdr_2; //create second ip packet header
 	//copy data from first ip header, overwrite necessary information
@@ -908,11 +914,14 @@ int main(int argc, char *argv[]){
 	memset(data, 0, IP_MAXPACKET);
 
 	//update data to be "Head2"
+	data = "Head2";
+	/*
 	data[0] = 'H';
 	data[1] = 'e';
 	data[2] = 'a';
 	data[3] = 'd';
 	data[4] = '2';
+	*/
 
 	struct ip iphdr_3; //create third tcp packet header
 	memcpy(&iphdr_3, &iphdr, sizeof(struct ip)); //copy data from first ip header
@@ -986,11 +995,14 @@ int main(int argc, char *argv[]){
 	memset(data, 0, IP_MAXPACKET);
 
 	//update data to be "Tail2"
+	data = "Tail2";
+	/*
 	data[0] = 'T';
 	data[1] = 'a';
 	data[2] = 'i';
 	data[3] = 'l';
   	data[4] = '2';
+	*/
 
 	struct ip iphdr_4; //create fourth tcp packet header
 	memcpy(&iphdr_4, &iphdr, sizeof(struct ip)); //copy data from first ip header
@@ -1053,7 +1065,7 @@ int main(int argc, char *argv[]){
 	printf("Standalone has completed\n");
 
 	free(src_mac);
-	free(data);
+	//free(data);
 	free(interface);
 	free(target);
 	free(src_ip);
