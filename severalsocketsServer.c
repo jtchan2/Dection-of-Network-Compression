@@ -181,8 +181,6 @@ int main (int argc, char *argv[]){
 	}
 
 	
-	//makes packets to not fragment
-	setsockopt(sockUDP, IPPROTO_IP, IP_MTU_DISCOVER, &frag, sizeof(frag));
 	
 	printf("created UDP socket\n");
 	if ( bind(sockUDP, (const struct sockaddr *) &serveraddrUDP, sizeof(serveraddrUDP))< 0){
@@ -226,6 +224,7 @@ int main (int argc, char *argv[]){
 	
 	int len= sizeof(clientaddrUDP);
 	timer = clock();
+	//receiving packts
 	for(int i=0; i<num_of_packets; i++){
 
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
