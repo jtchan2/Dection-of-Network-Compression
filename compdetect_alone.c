@@ -17,7 +17,6 @@
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
 #include <net/ethernet.h>
-//#include <pcap.h>
 #include <ctype.h>
 #include <sys/wait.h>
 #include <time.h>
@@ -590,16 +589,15 @@ int main(int argc, char *argv[]){
 
 	//creating low entropy packets
 	unsigned short id=0;
-	for( int i=0; i<number_of_packets; i++){
+	for( unsigned short int i=0; i<number_of_packets; i++){
 		low_entropy[i].length = payload;
-		for( int j=0; j<(payload -2); j++){
+		for( unsigned short int j=0; j<(payload -2); j++){
 			low_entropy[i].bytes[j]= 0; 
 		}
 
 		char packid[2];
-		packid[0]=id%256;
-		packid[1]=id/256;
-		id++;
+		packid[0]=(uint8_t)(i & 0xff);
+		packid[1]=(uint8_t)(i >> 8);
 
 		char * packetpayload = (char *) malloc(strlen(low_entropy[i].bytes)+ strlen(packid)+1);
 		strcpy(packetpayload, packid);
@@ -613,16 +611,15 @@ int main(int argc, char *argv[]){
 	close(rngData);
 
 	id=0;
-	for(int i=0; i<number_of_packets; i++){
+	for(unsigned short int i=0; i<number_of_packets; i++){
 		high_entropy[i].length = payload;
-		for(int j=0; j< (payload-2); j++){
+		for(unsigned short int j=0; j< (payload-2); j++){
 			high_entropy[i].bytes[j]=rngRandomData[j];
 		}
 
 		char packid[2];
-		packid[0]=id%256;
-		packid[1]=id/256;
-		id++;
+		packid[0]=(uint8_t)(i & 0xff);
+		packid[1]=(uint8_t)(i >> 8);
 
 		char * packetpayload = (char *) malloc(strlen(high_entropy[i].bytes)+ strlen(packid) + 1);
 		strcpy(packetpayload, packid);
