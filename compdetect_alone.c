@@ -17,7 +17,7 @@
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
 #include <net/ethernet.h>
-#include <pcap.h>
+//#include <pcap.h>
 #include <ctype.h>
 #include <sys/wait.h>
 #include <time.h>
@@ -26,10 +26,9 @@
 
 #define IP4_HDRLEN 20  // IPv4 header legnth
 #define TCP_HDRLEN 20 // TCP header lenght, does not include data
-#define SIZE_ETHERNET 14 // ethernet header size
 
-/* snap legnth (max bytes per packets to capture) */
-#define SNAP_LEN 1518
+
+
 
 typedef struct
 {
@@ -55,115 +54,13 @@ struct pseudo_header
 	u_int16_t tcp_length;
 };
 
-struct sniff_ethernet {
-	u_char  ether_dhost[ETHER_ADDR_LEN];    /* destination host address */
-	u_char  ether_shost[ETHER_ADDR_LEN];    /* source host address */
-	u_short ether_type;                     /* what type of info received  IP? ARP? RARP? etc */
-};
 
-/* Packet sniffer pseudo-IP header */
-struct sniff_ip {
-	u_char  ip_vhl;                 /* version << 4 | header length >> 2 */
-	u_char  ip_tos;                 /* type of service */
-  	u_short ip_len;                 /* total length */
-  	u_short ip_id;                  /* identification */
-  	u_short ip_off;                 /* fragment offset field */
-  	#define IP_RF 0x8000            /* reserved fragment flag */
-  	#define IP_DF 0x4000            /* don't fragment flag */
-  	#define IP_MF 0x2000            /* more fragments flag */
-  	#define IP_OFFMASK 0x1fff       /* mask for fragmenting bits */
-  	u_char  ip_ttl;                 /* time to live */
-  	u_char  ip_p;                   /* protocol */
-  	u_short ip_sum;                 /* checksum */
-  	struct  in_addr ip_src,ip_dst;  /* source and dest address */
-};
-
-#define IP_HL(ip)               (((ip)->ip_vhl) & 0x0f)
-#define IP_V(ip)                (((ip)->ip_vhl) >> 4)
-
-/* Packet sniffer pseudo-TCP header */
-typedef u_int tcp_seq;
-
-struct sniff_tcp {
-	u_short th_sport;               /* source port */
-  	u_short th_dport;               /* destination port */
-  	tcp_seq th_seq;                 /* sequence number */
-  	tcp_seq th_ack;                 /* acknowledgement number */
-  	u_char  th_offx2;               /* data offset, rsvd */
-  	#define TH_OFF(th)      (((th)->th_offx2 & 0xf0) >> 4)
-  	u_char  th_flags;
-  	#define TH_FIN  0x01
-  	#define TH_SYN  0x02
-  	#define TH_RST  0x04
-  	#define TH_PUSH 0x08
-  	#define TH_ACK  0x10
-  	#define TH_URG  0x20
-  	#define TH_ECE  0x40
-  	#define TH_CWR  0x80
-  	#define TH_FLAGS        (TH_FIN|TH_SYN|TH_RST|TH_ACK|TH_URG|TH_ECE|TH_CWR)
-  	u_short th_win;                 /* window */
-  	u_short th_sum;                 /* checksum */
-  	u_short th_urp;                 /* urgent pointer */
-};
 
 //Global Variables
 clock_t low_start, low_end, high_start, high_end; //Timers for TCP measuring
-pcap_t *handle;       /* packet capture handle */
 
 
-//handles timeout in receiving packets
-//and ends packet sniffing 
-void alarm_handler(int sig){
-  	pcap_breakloop(handle);
-}
 
-void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet){
-
-  	static int count = 1;                   /* packet counter */
-  
- 	/* declare pointers to packet headers */
- 	const struct sniff_ethernet *ethernet;  /* The ethernet header [1] */
-  	const struct sniff_ip *ip;              /* The IP header */
-  	const struct sniff_tcp *tcp;            /* The TCP header */
-
-  	int size_ip;
-  	int size_tcp;
-  
-  	count++;
-  
-  	/* define ethernet header */
-  	ethernet = (struct sniff_ethernet*)(packet);
-  
-  	/* define/compute ip header offset */
-  	ip = (struct sniff_ip*)(packet + SIZE_ETHERNET);
-  	size_ip = IP_HL(ip)*4;
-  	if (size_ip < 20) {
-	       	printf("   * Invalid IP header length: %u bytes\n", size_ip);
-		return;
-  	}
-  
-  	/* define/compute tcp header offset */
-  	tcp = (struct sniff_tcp*)(packet + SIZE_ETHERNET + size_ip);
-  	size_tcp = TH_OFF(tcp)*4;
-  	if (size_tcp < 20) {
-	       	printf("   * Invalid TCP header length: %u bytes\n", size_tcp);
-		return;
-	}
-  
-  	int src_port = ntohs(tcp->th_sport);
-  	int dst_port = ntohs(tcp->th_dport);
-
-  	if(count == 2 && src_port == 8000 && dst_port == 8080){
-		low_start = clock();
-  	}else if(count == 3 && src_port == 8001 && dst_port == 8080){
-		low_end = clock();
-  	}else if(count == 4 && src_port == 8000 && dst_port == 8080){
-    		high_start = clock();
-  	}else if(count == 5 && src_port == 8001 && dst_port == 8080){
-   		 high_end = clock();
-  	}
-	return;
-}
 
 // allocate mem for array of chars
 char* allocate_strmem(int len){
@@ -446,46 +343,8 @@ int main(int argc, char *argv[]){
 	 //Interface to send packets 
 	strcpy(interface, "enp0s3");
 
-	 //Now Setting up packet sniffing, TODO remove packet sniffing 
-	//char errbuf[PCAP_ERRBUF_SIZE];    /* error buffer for pcap */
 
-	 //Filter for recieving tcp packets from server with rst set
-	//char filter_exp[] = "(tcp port (8080 or 8000 or 8001)) and (tcp[tcpflags] & (tcp-rst) == (tcp-rst))";   /* filter expression [3] */
-	//struct bpf_program fp;      /* compiled filter program (expression) */
-	//bpf_u_int32 mask;     /* subnet mask */
-	//bpf_u_int32 net;      /* ip */
-	//int num_packets = 4;      /* number of packets to capture */
-
-	 /* get network number and mask associated with capture device */
-	//if(pcap_lookupnet(interface, &net, &mask, errbuf) == -1){
-	//	fprintf(stderr, "Couldn't get netmask for device %s: %s\n", interface, errbuf);
-	//	net = 0;
-	//	mask = 0;
-	// }
-
-	 //Open Capturing device
-	// handle = pcap_open_live(interface, SNAP_LEN, 1, 1000, errbuf);
-	//if(handle == NULL){
-	//	 fprintf(stderr, "Could not open device %s: %s\n", interface, errbuf);
-	//	 exit(EXIT_FAILURE);
-	//}
-	/* Ensure we are capturing on a ethernet device */
-	//if(pcap_datalink(handle) != DLT_EN10MB) {
-	// 	fprintf(stderr, "%s is not an ethernet\n", interface);
-	//	exit(EXIT_FAILURE);
-	//}
 	
-	//Compiling filter expression
-	//if(pcap_compile(handle, &fp, filter_exp, 0, net) ==-1){
-	//	fprintf(stderr, "Couldn't parse filter %s: %s\n",filter_exp, pcap_geterr(handle));
-	//	exit(EXIT_FAILURE);
-	//}
-
-	// Applying compiled filter
-	//if(pcap_setfilter(handle, &fp) == -1){
-	//	fprintf(stderr, "Couldn't install filter %s: %s\n",filter_exp, pcap_geterr(handle));
-	//	exit(EXIT_FAILURE);
-	//}
 
 	// creating raw socket to look up interface
 	if((sd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0){
@@ -565,48 +424,8 @@ int main(int argc, char *argv[]){
 	data[2] = 'a';
 	data[3] = 'd';
 	data[4] = '1';
-
-	// TODO POTENTIALLY ADD PACKET SNIFFING FOR RST HERE	
 	
-	// must create child to process to send udp packets
-	// while also sniffing for returning rst packets from server
-	/*
-	pid_t child = fork();
-
-	if(child == 0){
-		alarm(inter_measure_time+5);
-		signal(SIGALRM, alarm_handler);
-
-		// sniff for incoming packets
-		int result = pcap_loop(handle, num_packets,got_packet, NULL);
-
-		pcap_freecode(&fp);
-		pcap_close(handle);
-
-		if(result==0){// if expected paks are received
-			//calculate time elapsed in seconds
-			double total_low = (((double)low_end) - ((double)low_start)) / ((double)CLOCKS_PER_SEC);
-			double low_time = total_low*1000; //convert seconds to milliseconds
-			double total_high = (((double)high_end) - ((double)high_start)) / ((double)CLOCKS_PER_SEC);
-			double high_time = total_high*1000; //convert seconds to milliseconds
-			double difference = total_high - total_low;
-			
-			if(difference <= 100){
-				printf("\n No Network COmpression detected.\n");
-			}else{
-				printf("\n Network COmpression Detected. \n");
-			}
-		}else if(result ==-2){
-			// timout occurs before all packets received
-			printf("Failed to detect Network Compression\n");
-		}else{
-			//Any otehr error occured
-			printf("Pcpap Error occured\n");
-		}
-		//end the child
-		exit(0);
-	}
-	*/
+	
 	//create ipv4 header 
 	
 	//IPv4 header length (4 bits): Number of 32-bit words in header = 5
@@ -1049,8 +868,7 @@ int main(int argc, char *argv[]){
 
 	close(s);
 
-	//waiting for rst calculations
-	wait(0);
+	
 
 	printf("Standalone has completed\n");
 
