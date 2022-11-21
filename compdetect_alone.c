@@ -446,46 +446,46 @@ int main(int argc, char *argv[]){
 	 //Interface to send packets 
 	strcpy(interface, "enp0s3");
 
-	 //Now Setting up packet sniffing
-	char errbuf[PCAP_ERRBUF_SIZE];    /* error buffer for pcap */
+	 //Now Setting up packet sniffing, TODO remove packet sniffing 
+	//char errbuf[PCAP_ERRBUF_SIZE];    /* error buffer for pcap */
 
 	 //Filter for recieving tcp packets from server with rst set
-	char filter_exp[] = "(tcp port (8080 or 8000 or 8001)) and (tcp[tcpflags] & (tcp-rst) == (tcp-rst))";   /* filter expression [3] */
-	struct bpf_program fp;      /* compiled filter program (expression) */
-	bpf_u_int32 mask;     /* subnet mask */
-	bpf_u_int32 net;      /* ip */
-	int num_packets = 4;      /* number of packets to capture */
+	//char filter_exp[] = "(tcp port (8080 or 8000 or 8001)) and (tcp[tcpflags] & (tcp-rst) == (tcp-rst))";   /* filter expression [3] */
+	//struct bpf_program fp;      /* compiled filter program (expression) */
+	//bpf_u_int32 mask;     /* subnet mask */
+	//bpf_u_int32 net;      /* ip */
+	//int num_packets = 4;      /* number of packets to capture */
 
 	 /* get network number and mask associated with capture device */
-	if(pcap_lookupnet(interface, &net, &mask, errbuf) == -1){
-		fprintf(stderr, "Couldn't get netmask for device %s: %s\n", interface, errbuf);
-		net = 0;
-		mask = 0;
-	 }
+	//if(pcap_lookupnet(interface, &net, &mask, errbuf) == -1){
+	//	fprintf(stderr, "Couldn't get netmask for device %s: %s\n", interface, errbuf);
+	//	net = 0;
+	//	mask = 0;
+	// }
 
 	 //Open Capturing device
-	 handle = pcap_open_live(interface, SNAP_LEN, 1, 1000, errbuf);
-	if(handle == NULL){
-		 fprintf(stderr, "Could not open device %s: %s\n", interface, errbuf);
-		 exit(EXIT_FAILURE);
-	}
+	// handle = pcap_open_live(interface, SNAP_LEN, 1, 1000, errbuf);
+	//if(handle == NULL){
+	//	 fprintf(stderr, "Could not open device %s: %s\n", interface, errbuf);
+	//	 exit(EXIT_FAILURE);
+	//}
 	/* Ensure we are capturing on a ethernet device */
-	if(pcap_datalink(handle) != DLT_EN10MB) {
-	 	fprintf(stderr, "%s is not an ethernet\n", interface);
-		exit(EXIT_FAILURE);
-	}
+	//if(pcap_datalink(handle) != DLT_EN10MB) {
+	// 	fprintf(stderr, "%s is not an ethernet\n", interface);
+	//	exit(EXIT_FAILURE);
+	//}
 	
 	//Compiling filter expression
-	if(pcap_compile(handle, &fp, filter_exp, 0, net) ==-1){
-		fprintf(stderr, "Couldn't parse filter %s: %s\n",filter_exp, pcap_geterr(handle));
-		exit(EXIT_FAILURE);
-	}
+	//if(pcap_compile(handle, &fp, filter_exp, 0, net) ==-1){
+	//	fprintf(stderr, "Couldn't parse filter %s: %s\n",filter_exp, pcap_geterr(handle));
+	//	exit(EXIT_FAILURE);
+	//}
 
 	// Applying compiled filter
-	if(pcap_setfilter(handle, &fp) == -1){
-		fprintf(stderr, "Couldn't install filter %s: %s\n",filter_exp, pcap_geterr(handle));
-		exit(EXIT_FAILURE);
-	}
+	//if(pcap_setfilter(handle, &fp) == -1){
+	//	fprintf(stderr, "Couldn't install filter %s: %s\n",filter_exp, pcap_geterr(handle));
+	//	exit(EXIT_FAILURE);
+	//}
 
 	// creating raw socket to look up interface
 	if((sd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0){
@@ -570,7 +570,7 @@ int main(int argc, char *argv[]){
 	
 	// must create child to process to send udp packets
 	// while also sniffing for returning rst packets from server
-	
+	/*
 	pid_t child = fork();
 
 	if(child == 0){
@@ -606,6 +606,7 @@ int main(int argc, char *argv[]){
 		//end the child
 		exit(0);
 	}
+	*/
 	//create ipv4 header 
 	
 	//IPv4 header length (4 bits): Number of 32-bit words in header = 5
