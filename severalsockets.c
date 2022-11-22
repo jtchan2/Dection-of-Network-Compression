@@ -338,7 +338,7 @@ int main(int argc, char *argv[]){
 
         unsigned int rngData2 = open("rng", O_RDONLY);
         read(rngData2,rngRandomData2, size_payload);
-        close(rngData);
+        close(rngData2);
 	memcpy(&high->payload, &rngRandomData2, MAX_PAYLOAD_SIZE);
 
 
