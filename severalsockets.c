@@ -319,7 +319,7 @@ int main(int argc, char *argv[]){
 	for( unsigned short int i=0; i<num_of_packets; i++){
 		low->byte_0_id= (uint8_t)(i & 0xff);
                 low->byte_1_id= (uint8_t)(i >> 8);
-                memcpy(buffer, (char *) low, sizeof(low));
+                memcpy(buffer, (char *) low, sizeof(struct pak));
 		sendto(sockUDP,buffer, (size_payload+2), MSG_CONFIRM, (const struct sockaddr*) &server_address, sizeof(server_address));
 		//sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 		usleep(100);
@@ -330,9 +330,24 @@ int main(int argc, char *argv[]){
 	sleep(pause);
 	printf("Now Sending high entropy data\n");
 
-	for(int i=0; i<num_of_packets; i++){
-		
-		sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+	// trying to create high entropy data
+	struct pak * high= (struct pak*) malloc(sizeof(struct pak));
+
+	char rngRandomData2[MAX_PAYLOAD_SIZE];
+
+
+        unsigned int rngData2 = open("rng", O_RDONLY);
+        read(rngData2,rngRandomData2, size_payload);
+        close(rngData);
+	memcpy(&high->payload, &rngRandomData2, MAX_PAYLOAD_SIZE);
+
+
+	for(unsigned short int i=0; i<num_of_packets; i++){
+		high->byte_0_id= (uint8_t)(i & 0xff);
+                high->byte_1_id= (uint8_t)(i >> 8);
+		memcpy(buffer, (char *) high, sizeof(struct pak));
+		sendto(sockUDP, buffer, (size_payload+2), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
+		//sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 		usleep(100);
 	}
 	printf("Sent 'high entropy data'\n");
