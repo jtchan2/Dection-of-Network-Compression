@@ -156,11 +156,13 @@ int main(int argc, char *argv[]){
 		int length;
 		char bytes[size_payload];
 	};
+	
 	struct pak{
 		char byte_0_id;
 		char byte_1_id;
-		char payload[MAX_PAYLOAD_SIZE];
+		char data_payload[MAX_PAYLOAD_SIZE];
 	};
+	
 	char buffer[3000];
 	char msg[256];
 
@@ -320,13 +322,13 @@ int main(int argc, char *argv[]){
 
 
 	printf("Now Sending Low entropy data packets\n");
-	struct pak *low= (struct pak *)malloc(sizeof(struct pak));
-        memset(&low->payload, 0, MAX_PAYLOAD_SIZE);
+	struct pak *low= (struct pak *)malloc(sizeof( struct pak));
+        memset(&low->data_payload, 0, MAX_PAYLOAD_SIZE);
 
 	for( unsigned short int i=0; i<num_of_packets; i++){
 		low->byte_0_id= (uint8_t)(i & 0xff);
                 low->byte_1_id= (uint8_t)(i >> 8);
-                memcpy(buffer, (char *) low, sizeof(struct pak));
+                memcpy(buffer, (char *) low, sizeof( struct pak));
 		sendto(sockUDP,buffer, (size_payload+2), MSG_CONFIRM, (const struct sockaddr*) &server_address, sizeof(server_address));
 		//sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 		usleep(100);
@@ -346,7 +348,7 @@ int main(int argc, char *argv[]){
         unsigned int rngData2 = open("rng", O_RDONLY);
         read(rngData2,rngRandomData2, size_payload);
         close(rngData2);
-	memcpy(&high->payload, &rngRandomData2, MAX_PAYLOAD_SIZE);
+	memcpy(&high->data_payload, &rngRandomData2, MAX_PAYLOAD_SIZE);
 
 
 	for(unsigned short int i=0; i<num_of_packets; i++){
