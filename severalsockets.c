@@ -255,9 +255,9 @@ int main(int argc, char *argv[]){
 	
 	struct packet *low_entropy = (struct packet *) malloc (num_of_packets * sizeof(struct packet));
 
-	struct packet *high_entropy = (struct packet *)malloc (num_of_packets * sizeof(struct packet));
+	//struct packet *high_entropy = (struct packet *)malloc (num_of_packets * sizeof(struct packet));
 
-	/*
+	
 	unsigned short id=0;
 	//bit shift ids and add comments
 	for(int i=0; i<num_of_packets; i++){
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]){
 		strcpy(low_entropy[i].bytes, payload);
 		
 	}
-	*/
+	
 	
 
 	//high entropy packet making, gets data from urandom file called rng
@@ -360,7 +360,7 @@ int main(int argc, char *argv[]){
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
 	free(low_entropy);
-	free(high_entropy);
+	//free(high_entropy);
 	//free(low);
 	//free(high);
 	close(sockUDP);
