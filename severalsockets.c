@@ -257,9 +257,7 @@ int main(int argc, char *argv[]){
 
 	struct packet *high_entropy = (struct packet *)malloc (num_of_packets * sizeof(struct packet));
 
-	
-
-	
+	/*
 	unsigned short id=0;
 	//bit shift ids and add comments
 	for(int i=0; i<num_of_packets; i++){
@@ -283,6 +281,7 @@ int main(int argc, char *argv[]){
 		strcpy(low_entropy[i].bytes, payload);
 		
 	}
+	*/
 	
 
 	//high entropy packet making, gets data from urandom file called rng
