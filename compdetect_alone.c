@@ -378,13 +378,13 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	// Seetting Destination MAC addr
-	// This is Mac address of vm bridge adapter settings i.e. vm connection
+	// This is Mac address of server wanted to send to 
 	dst_mac[0] = 0x08;	
 	dst_mac[1] = 0x00;	
 	dst_mac[2] = 0x27;	
-	dst_mac[3] = 0x1f;	
-	dst_mac[4] = 0xc6;	
-	dst_mac[5] = 0xb3;	
+	dst_mac[3] = 0xad;	
+	dst_mac[4] = 0xf9;	
+	dst_mac[5] = 0xf2;	
 	
 	
 	//Source ipv4 addr
