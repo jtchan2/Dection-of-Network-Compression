@@ -239,27 +239,10 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
-	//New PAcket Creation
-	//possible malloc doing low= (struct packet) malloc(sizeof(packet)
-	/*
-	struct pak *low= (struct pak *)malloc(sizeof(struct pak));
-	memset(&low->payload, 0, MAX_PAYLOAD_SIZE);
-	for(unsigned short int i=0; i<num_of_packets; i++){
-		low->byte_0_id= (uint8_t)(i & 0xff);
-		low->byte_1_id= (uint8_t)(i >> 8);
-		memcpy(buffer, (char *) low, sizeof(low));
-			
-	}
-	*/
 
-
-	//
-	
 	//creating Packet Phase
 	
 	struct packet *low_entropy = (struct packet *) malloc (num_of_packets * sizeof(struct packet));
-
-	//struct packet *high_entropy = (struct packet *)malloc (num_of_packets * sizeof(struct packet));
 
 	
 	unsigned short id=0;
@@ -286,42 +269,6 @@ int main(int argc, char *argv[]){
 		
 	}
 	
-	
-	
-
-	//high entropy packet making, gets data from urandom file called rng
-	/*
-	unsigned char rngRandomData[size_payload];
-
-	unsigned int rngData = open("rng", O_RDONLY);
-	read(rngData,rngRandomData, size_payload);
-	close(rngData);
-	*/
-
-	/*
-	id=0;
-	for(int i=0; i<num_of_packets; i++){
-                high_entropy[i].length= size_payload;
-                for( int j=0; j< (size_payload -2); j++){
-                        high_entropy[i].bytes[j]=rngRandomData[j];
-                }
-
-                
-                char packid[2];
-		packid[0]=id%256;
-		packid[1]=id/256;
-		id++;
-                
-
-                char * payload = (char *) malloc(strlen(high_entropy[i].bytes)+ strlen(packid)+1);
-
-                strcpy(payload, packid);
-
-                strcat(payload, high_entropy[i].bytes);
-                strcpy(high_entropy[i].bytes, payload);
-                
-        }
-	*/
 
 
 	printf("Now Sending Low entropy data packets\n");
@@ -333,7 +280,6 @@ int main(int argc, char *argv[]){
                 low->byte_1_id= (uint8_t)(i >> 8);
                 memcpy(buffer, (char *) low, sizeof( struct pak));
 		sendto(sockUDP,buffer, (size_payload+2), MSG_CONFIRM, (const struct sockaddr*) &server_address, sizeof(server_address));
-		//sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 		usleep(100);
 	}
 	printf("low packets sent\n");
@@ -359,15 +305,13 @@ int main(int argc, char *argv[]){
                 high->byte_1_id= (uint8_t)(i >> 8);
 		memcpy(buffer, (char *) high, sizeof(struct pak));
 		sendto(sockUDP, buffer, (size_payload+2), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
-		//sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
 		usleep(100);
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
 	free(low_entropy);
-	//free(high_entropy);
-	//free(low);
-	//free(high);
+	free(low);
+	free(high);
 	close(sockUDP);
 	
 	printf("starting post probe TCP\n");
