@@ -451,28 +451,29 @@ int main(int argc, char *argv[]){
 	//Dont frag flag
 	ip_flags[1] = 0;
 
-	//more frags flowwoing flag
+	//more frags following flag
 	ip_flags[2] = 0;
 
+	//fragmentation offset 13 bits
 	ip_flags[3] = 0;
 
 	iphdr.ip_off = htons ((ip_flags[0] << 15)
                       + (ip_flags[1] << 14)
                       + (ip_flags[2] << 13)
                       +  ip_flags[3]);
-	//setting ttl from config informatiom
+	//setting ttl from config informatiom 8 bits
 	iphdr.ip_ttl = timeToLive;
 
-	// Transport layer protocol
+	// Transport layer protocol 8bits
 	iphdr.ip_p = IPPROTO_TCP;
 	
-	//Source IPv4 address
+	//Source IPv4 address 32 bits
 	if((status = inet_pton(AF_INET, src_ip, &(iphdr.ip_src))) !=1){
 		fprintf(stderr, "inet_pton failed. \n Error message: %s", strerror(status));
 		exit(EXIT_FAILURE);
 	}
 
-	//Destination IPv4 address
+	//Destination IPv4 address 32 bits
 	if((status = inet_pton(AF_INET, dst_ip, &(iphdr.ip_dst))) !=1){
 		fprintf (stderr, "inet_pton failed.\nError message: %s", strerror (status));
     exit(EXIT_FAILURE);
@@ -496,7 +497,7 @@ int main(int argc, char *argv[]){
 
 	tcphdr.th_sport = htons(probe_tcp); // set source port
 	
-	tcphdr.th_dport = htons(tcp_sinHead);
+	tcphdr.th_dport = htons(tcp_sinHead); //sser destination port
 
 	tcphdr.th_seq = htonl(0); //sequence # is 0 because first packet
 	
@@ -535,7 +536,7 @@ int main(int argc, char *argv[]){
 	//calculate tcp check sum
 	tcphdr.th_sum = checksum((unsigned short*) pseudogram , psize);
 
-	//frame length
+	//frame length = ip header + tcp header +data
 	int tcp_packet_length = IP4_HDRLEN + TCP_HDRLEN + datalen;
 
 	int sockRaw; // scoket file descriptor used for sending tcp packets
@@ -561,6 +562,7 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
+	printf("Sent Sin Head 1\n");
 	close(sockRaw);
 
 
@@ -573,6 +575,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
+	// set address for udp for the client and server 
 	struct sockaddr_in serveraddr, clientaddr;
 	
 	memset(&serveraddr, 0, sizeof(serveraddr));
@@ -590,49 +593,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	struct udpPacket *low_entropy = (struct udpPacket *) malloc (number_of_packets * sizeof(struct udpPacket));
-	struct udpPacket *high_entropy = (struct udpPacket *) malloc (number_of_packets * sizeof(struct udpPacket));
-
-	//creating low entropy packets
-	unsigned short id=0;
-	for( unsigned short int i=0; i<number_of_packets; i++){
-		low_entropy[i].length = payload;
-		for( unsigned short int j=0; j<(payload -2); j++){
-			low_entropy[i].bytes[j]= 0; 
-		}
-
-		char packid[2];
-		packid[0]=(uint8_t)(i & 0xff);
-		packid[1]=(uint8_t)(i >> 8);
-
-		char * packetpayload = (char *) malloc(strlen(low_entropy[i].bytes)+ strlen(packid)+1);
-		strcpy(packetpayload, packid);
-		strcat(packetpayload, low_entropy[i].bytes);
-		strcpy(low_entropy[i].bytes, packetpayload);
-	}
-
-	unsigned char rngRandomData[payload];
-	unsigned int rngData = open("rng", O_RDONLY);
-	read(rngData, rngRandomData, payload);
-	close(rngData);
-
-	id=0;
-	for(unsigned short int i=0; i<number_of_packets; i++){
-		high_entropy[i].length = payload;
-		for(unsigned short int j=0; j< (payload-2); j++){
-			high_entropy[i].bytes[j]=rngRandomData[j];
-		}
-
-		char packid[2];
-		packid[0]=(uint8_t)(i & 0xff);
-		packid[1]=(uint8_t)(i >> 8);
-
-		char * packetpayload = (char *) malloc(strlen(high_entropy[i].bytes)+ strlen(packid) + 1);
-		strcpy(packetpayload, packid);
-		strcat(packetpayload, high_entropy[i].bytes);
-		strcpy(high_entropy[i].bytes, packetpayload);
-	}
-
+	//sett do not fragment flag of udp packets
 	int frag = IP_PMTUDISC_DO;
 
 	if( setsockopt(sockUDP, IPPROTO_IP, IP_MTU_DISCOVER, &frag, sizeof(frag)) <0){
@@ -640,7 +601,7 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
-	//setting TTL of packets
+	//setting TTL of udp packets
 	if( setsockopt(sockUDP, IPPROTO_IP, IP_TTL, &timeToLive, sizeof(timeToLive)) <0){
 		printf("Not able to set ttl of UDP packets. Ending now \n");
 		exit(1);
@@ -648,20 +609,22 @@ int main(int argc, char *argv[]){
 
 	// now sending low packets
 	printf("now sending low packets\n");
-	char buffer [3000];
-
+	
+	char buffer [3000]; // char buffer to send packets through
+	
+	//creation of low entropy packets
 	struct packet *low = (struct packet *) malloc(sizeof(struct packet));
-	memset(&low->data_payload, 0, MAX_PAYLOAD_SIZE);
+	memset(&low->data_payload, 0, MAX_PAYLOAD_SIZE); // set mem of low packet to all 0
 
 
 	for(unsigned short int i =0; i< number_of_packets; i++){
-		low->byte_0_id= (uint8_t)(i & 0xff);
-		low->byte_1_id= (uint8_t)(i >> 8);
-		
+		low->byte_0_id= (uint8_t)(i & 0xff); // set lower order byte id
+		low->byte_1_id= (uint8_t)(i >> 8); // set higher order byte id
+		//copy memory of low packet as char pointer to a string buffer
 		memcpy(buffer, (char *) low, sizeof(struct packet));
-		
+		// send string buffer but only size of specific payload + 2 to account for id
 		sendto(sockUDP, buffer, (payload + 2), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
-		//sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+		usleep(100); // slep to slow down sending to allow server to receive all packets
 	}
 	printf("Lows packets Sent\n");
 
@@ -729,6 +692,8 @@ int main(int argc, char *argv[]){
 		perror("sendto failed");
 		exit(1);
 	}
+
+	printf("Sent Sin Tail 1\n");
 
 	close(sockRaw);
 
@@ -798,34 +763,40 @@ int main(int argc, char *argv[]){
 		perror("sendto failed");
 	}
 
+	printf("Sent Sin Head 2\n");
+
 	close(sockRaw);
 
 
 	printf("Now sending high data\n");
 
+	//now creating high entropy packet pointer
 	struct packet * high= (struct packet *) malloc(sizeof(struct packet));
 
+	// opens up /dev/urandom file called rng and copies data into rngRandomdata
+	// to be sued for high entropy data payload
 	char rngRandomData2[MAX_PAYLOAD_SIZE];
 	unsigned int rngData2 = open("rng", O_RDONLY);
 	read(rngData2, rngRandomData2, payload);
 	close(rngData2);
 
+	//copy memory of high entropy data into high entropy pack poitner's payload
 	memcpy(&high->data_payload, &rngRandomData2, MAX_PAYLOAD_SIZE);
 
 	for(int i=0; i< number_of_packets; i++){
-		high->byte_0_id = (uint8_t)(i & 0xff);
-		high->byte_1_id = (uint8_t)(i >> 8);
-		
+		high->byte_0_id = (uint8_t)(i & 0xff); // set low order byte id
+		high->byte_1_id = (uint8_t)(i >> 8); //set higher order byte id
+		//copy memory of high entropy packet as char pointer into string buffer
 		memcpy(buffer, (char *) high, sizeof(struct packet));
-
+		//send string buffer but only to sie of given payload + 2 to acount for packed id
 		sendto(sockUDP, buffer, (payload +2), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
-		//sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+		usleep(100); //slow down sneding so server can receive all packs
 	}
 
 	printf("High packet sent\n");
 
-	free(low_entropy);
-	free(high_entropy);
+	free(low);
+	free(high);
 	close(sockUDP);
 
 	//clear out old data
@@ -892,12 +863,14 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
+	printf("Sent Sin Tail 2\n");
 	close(sockRaw);
 
 	
 
 	printf("Standalone has completed\n");
 
+	// free malloced data used for raw sock sending
 	free(src_mac);
 	free(data);
 	free(interface);
