@@ -133,6 +133,7 @@ int main (int argc, char *argv[]){
 	char port_TCP[256];
 	char paySize [256];
 	char numOfPaks [256];
+	char time [256];
 	int n;
 
 	if( (n = recv (ppclient_socket, destination_UDP, sizeof(destination_UDP), 0))<0){
@@ -148,12 +149,16 @@ int main (int argc, char *argv[]){
 	paySize[n]='\0';
 	n=recv(ppclient_socket, numOfPaks, sizeof(numOfPaks), 0);
 	numOfPaks[n]='\0';
+	n=recv(ppclient_socket, time, sizeof(time),0);
+	time[n]='\0';
+	printf("time: %s\n",time);
 
 	// converts received items into local variable
 	port = atoi(destination_UDP);
 	int size_payload = atoi(paySize);
 	char bytes[size_payload];
 	int num_of_packets= atoi(numOfPaks);
+	int time_pause= atoi(time);
 
 	printf("Ending Pre Probing TCP phase\n");
 	close(ppclient_socket);
@@ -277,6 +282,10 @@ int main (int argc, char *argv[]){
 	if((client_sockPost= accept(post_sock, (struct sockaddr*) &client_addr, &addr_size))<0){
 		perror("Not able to Accept for Post Probing pahse TCP");
 		exit(1);
+	}
+
+	if(client_sockPost>0){
+		printf("Accepted\n");
 	}
 	
 	//sending results of packet receiving to Client
