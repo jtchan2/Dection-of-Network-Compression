@@ -273,9 +273,9 @@ int main(int argc, char *argv[]){
 
 	printf("Now Sending Low entropy data packets\n");
 	struct pak *low= (struct pak *)malloc(sizeof( struct pak));
+	memset(&low->data_payload, 0, MAX_PAYLOAD_SIZE);
 
 	for( unsigned short int i=0; i<num_of_packets; i++){
-        	memset(&low->data_payload, 0, MAX_PAYLOAD_SIZE);
 		low->byte_0_id= (uint8_t)(i & 0xff);
                 low->byte_1_id= (uint8_t)(i >> 8);
                 memcpy(buffer, (char *) low, sizeof( struct pak));

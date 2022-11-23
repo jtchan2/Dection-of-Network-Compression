@@ -10,13 +10,28 @@
 #include <time.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <inttypes.h>
+#include <stdbool.h>
 #include "cJSON.h"
+
+volatile int stop_loop = 0;
+volatile int stop_loop_2 = 0;
 
 typedef struct{
 	char server_ip[100];
 	int port_TCP;
 }instructions;
 
+//handle time out while waiting low entopy data
+void alarm_handler(int sig){
+	stop_loop = 1;
+}
+
+//handle time out while waiting for high entropy data
+void alarm_handler2(int sig){
+	stop_loop_2= 1;
+}
 instructions cJSON_make_struct(char* file, instructions settings){
 	cJSON *json, *item;
 	json = cJSON_Parse(file);
@@ -225,35 +240,71 @@ int main (int argc, char *argv[]){
 
 // UDP packet receiving  here 
 
-	clock_t timer;
+	clock_t timer_low_start, timer_low_end;
 	
 	int len= sizeof(clientaddrUDP);
-	timer = clock();
+	//timer = clock();
 	//receiving packts
+	/*
 	for(int i=0; i<num_of_packets; i++){
 
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
-		
-		
 	}
-	timer = clock()-timer;
-	double time_taken = ((double)timer)/CLOCKS_PER_SEC;
+	*/
+	//New Recv method
+	int counter =1 ;
+	while(counter < num_of_packets && stop_loop ==0){
+		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
+		if(counter == 0 && n >0){
+			timer_low_start = clock();
+			alarm(5); // if not all packets are recv after 5 sec, stop waiting
+			signal(SIGALRM, alarm_handler);
+		}
+		counter++;
+	}
+	timer_low_end = clock();
+
+	//calculate time in seconds
+	double time_taken = (((double)timer_low_end) - ((double) timer_low_start)) / ((double) CLOCKS_PER_SEC);
+	printf("Low time : %lf sec\n", time_taken);
+	time_taken = time_taken*1000; //convert to ms
+	printf("Low time : %lf ms \n", time_taken);
 	
+
 	printf("recieved Low Entropy packets\n");
 	printf("\n");
-	printf("Recieving 'high entropy data/packets' after a short break\n");
+	printf("Recieving 'high entropy data/packets' after a short break of %d seconds\n", time_pause);
+
 	printf("\n");
 
 	printf("Now Recieve high entropy data packets'\n");
-	clock_t timer2;
-	timer2=clock();
+	clock_t timer_high_start, timer_high_end;
+	//timer2=clock();
+	/*
 	for(int i=0; i<num_of_packets; i++){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
 		
 	}
+	*/
+	counter = 0;
+
+	//new high recv
+	while(counter < num_of_packets && stop_loop_2 == 0){
+		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
+		if(counter ==0 && n> 0){ //start waiting period
+			timer_high_start = clock();
+			alarm(5); // if packets are not all recv by 5 second stop waiting
+			signal(SIGALRM, alarm_handler2);
+		}
+		counter++;
+	}
 	
-	timer2= clock()-timer2;
-	double time_taken2= ((double)timer2)/CLOCKS_PER_SEC;
+	timer_high_end= clock();
+	// calculate time in seconds
+	double time_taken2= (((double)timer_high_end) - ((double)timer_high_start)) / ((double)CLOCKS_PER_SEC);
+	printf("high time : %lf sec\n", time_taken2);
+	time_taken2= time_taken2 * 1000; //convert to ms
+	printf("high time : %lf ms \n", time_taken2);
 	
 	printf("recieved High entropy packts\n");
 
@@ -261,7 +312,8 @@ int main (int argc, char *argv[]){
 	close(sockUDP);
 	
 	//Does math of finding time difference in seconds then converts to MS
-	double time_overall = (time_taken2 - time_taken)*((double)1000);
+	double time_overall = time_taken2 - time_taken;
+	printf("Time calc is : %lf\n", time_overall);
 	char  *mille;
 	if(time_overall >((double)100)){
 		mille="Compression Detected!";
