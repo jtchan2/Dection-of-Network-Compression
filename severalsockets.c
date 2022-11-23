@@ -146,20 +146,22 @@ int main(int argc, char *argv[]){
 	instructions config= read_file(argv[1]);
 	
 	printf("Start Pre-probing TCP phase\n");
-	int preprobe_socket;
-	int num_of_packets=config.num_of_paks;
-	int size_payload=config.payload_size;
-	int pause=config.measure_time;
 
-	//structure of a packet for UDP sending
+	int preprobe_socket;
+	int num_of_packets=config.num_of_paks; // number of packets to send
+	int size_payload=config.payload_size; // size of packet payloads
+	int pause=config.measure_time; // used for making packet sending to have a break
+
+	//Old Structure of UDP packet sending, connected to code surrouned
+	// by hyphens
 	struct packet{
 		int length;
 		char bytes[size_payload];
 	};
-	
+	//Correct packet struct used for UDP packet sending
 	struct pak{
-		char byte_0_id;
-		char byte_1_id;
+		char byte_0_id; //lower order byte id
+		char byte_1_id; //higher order byte id
 		char data_payload[MAX_PAYLOAD_SIZE];
 	};
 	
@@ -171,13 +173,15 @@ int main(int argc, char *argv[]){
 		perror("Unable to create Pre-probe Socket");
 		exit(1);
 	}
-	int port;
-	char *ip = config.server_ip;
-	char *clientip= config.client_ip;
+	//set variables to be used for socket creation
+	int port; // port to be used for socket sending
+	char *ip = config.server_ip; //server ip address
+	char *clientip= config.client_ip; // client ip address
 	struct sockaddr_in serveraddr;
 	port = config.port_TCP;
 
 	memset(&serveraddr, 0, sizeof(serveraddr));
+	//Set ip address for Pre probe TCP 
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port=htons(port);
 	serveraddr.sin_addr.s_addr= inet_addr(ip);
@@ -189,7 +193,7 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	
-	//Sending config information to the server
+	//Sending config information to the server from client config file
 	sprintf(msg, "%d",config.destinationUDP_port);
 	send(preprobe_socket, (char *) msg, sizeof(msg), 0);
 	sprintf(msg, "%d", config.port_TCP);
@@ -208,6 +212,7 @@ int main(int argc, char *argv[]){
 
 	//Start of UDP Phase
 	int sockUDP;
+	// change port for UDP sending
 	port = config.destinationUDP_port;
 	serveraddr.sin_port= htons(port);
 
@@ -217,16 +222,19 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
-	//Sett bindings for client udp 
+	//Sett bindings for client udp  and setting memory
 	struct sockaddr_in server_address, client_address;
 	
 	memset(&server_address, 0, sizeof(server_address));
 	memset(&client_address, 0, sizeof(client_address));
+	//set up ipaddress for server socket
 	server_address.sin_family= AF_INET;
 	server_address.sin_port = htons(port);
 	server_address.sin_addr.s_addr = inet_addr(ip);
 
 	port = config.sourceUDP_port;
+
+	//set up ipaddress  for UDP sending for client socket
 	client_address.sin_family= AF_INET;
 	client_address.sin_port = htons(port);
 	client_address.sin_addr.s_addr = inet_addr(clientip);
@@ -240,78 +248,108 @@ int main(int argc, char *argv[]){
 	}
 
 
-	//creating Packet Phase
+	/* Old packet creating phase down, section is seperated by '-'
+	 * If this code section is removed for some reason it causes whole
+	 * code to break. Unable to determine issue why it is being caused.
+	 * Additionally, none of its creation is used anywhere except for
+	 * filling up a pointer, it is not sent but some form of impact 
+	 * on overall code.
+	 */
+	//--------------------------------------------
 	
+	//old way had a packet pointer that storesa packet array of each size
+	//being the wanted size received from serve
 	struct packet *low_entropy = (struct packet *) malloc (num_of_packets * sizeof(struct packet));
 
-	
+	//car to be sued for id keeping
 	unsigned short id=0;
-	//bit shift ids and add comments
+	//for loop to set low entropy data to 0
 	for(int i=0; i<num_of_packets; i++){
 		low_entropy[i].length= size_payload;
+		//set payload mem = 0
 		for( int j=0; j< (size_payload -2); j++){
 			low_entropy[i].bytes[j]=0;
 		}
 
-		//correctly sets id of packet
+		// sets id of packet by "bitshifting" incorrectly
 		char packid[2];
 		packid[0]=id%256;
 		packid[1]=id/256;
 		id++;
 		
-
+		//create a paylaod buffer fo specific byte length to be sent
 		char * payload = (char *) malloc(strlen(low_entropy[i].bytes)+ strlen(packid)+1);
 
+		//copy packet id to paylaod buffer
 		strcpy(payload, packid);
-		
+		//concatinate payload bytes to buffer payload 
 		strcat(payload, low_entropy[i].bytes);
+		//copy payload buffer into pointer payload
 		strcpy(low_entropy[i].bytes, payload);
 		
 	}
-	
+	/* Again above code/ code in between commented hyphens is old way
+	 * of making low entropy UDP packets. It is not used anywhere except
+	 * here. If it is removed from code it causes the whole code to break
+	 * and not send data correctly. THe correct udp code making is done in
+	 * for loop at forloop of sending packets
+	 */
+	//-------------------------------------------------------------
 
 
 	printf("Now Sending Low entropy data packets\n");
-	struct pak *low= (struct pak *)malloc(sizeof( struct pak));
-	memset(&low->data_payload, 0, MAX_PAYLOAD_SIZE);
 
+	//creation of low packet data
+	struct pak *low= (struct pak *)malloc(sizeof( struct pak));
+	memset(&low->data_payload, 0, MAX_PAYLOAD_SIZE); // set mem of low packet to 0
+	
+	//sending low packet data wanted nubmer of times
 	for( unsigned short int i=0; i<num_of_packets; i++){
-		low->byte_0_id= (uint8_t)(i & 0xff);
-                low->byte_1_id= (uint8_t)(i >> 8);
-                memcpy(buffer, (char *) low, sizeof( struct pak));
+		low->byte_0_id= (uint8_t)(i & 0xff); //setting lower order byte id
+                low->byte_1_id= (uint8_t)(i >> 8); // setting higher order byte id
+                //copy memory of low packet struct pointer to a string buffer
+		memcpy(buffer, (char *) low, sizeof( struct pak));
+		
+		//send string buffer but only size of given paylaod +2 for account for id
 		sendto(sockUDP,buffer, (size_payload+2), MSG_CONFIRM, (const struct sockaddr*) &server_address, sizeof(server_address));
 		usleep(100);
 	}
 	printf("low packets sent\n");
 
 	printf("Pausing to split UDP low packet data to send high entropy 'data'\n");
-	sleep(pause);
+	sleep(pause); // sleeping code for given intermediate measure time by config file
 	printf("Now Sending high entropy data\n");
 
-	// trying to create high entropy data
+	// Creating high entropy packet pointer
 	struct pak * high= (struct pak*) malloc(sizeof(struct pak));
 
+
+	//Opens up /dev/urandom file called rng and copies data into rngRandomdata to be used for high entropy packet sending
 	char rngRandomData2[MAX_PAYLOAD_SIZE];
-
-
         unsigned int rngData2 = open("rng", O_RDONLY);
         read(rngData2,rngRandomData2, size_payload);
         close(rngData2);
+	//copy memory of high entropy packet into high entropy packet pointer's payload
 	memcpy(&high->data_payload, &rngRandomData2, MAX_PAYLOAD_SIZE);
 
-
+	//creating High entropy data
 	for(unsigned short int i=0; i<num_of_packets; i++){
-		high->byte_0_id= (uint8_t)(i & 0xff);
-                high->byte_1_id= (uint8_t)(i >> 8);
+		high->byte_0_id= (uint8_t)(i & 0xff); //writes lower byte id
+                high->byte_1_id= (uint8_t)(i >> 8); // writes higher order byte id
+		// copy packet pointer of high entropy data into a string buffer
 		memcpy(buffer, (char *) high, sizeof(struct pak));
+		//send buffer but only the size of given payload +2 for account for pack id
 		sendto(sockUDP, buffer, (size_payload+2), MSG_CONFIRM, (const struct sockaddr *) &server_address, sizeof(server_address));
-		usleep(100);
+		usleep(100); //sleep to slow down sending to server
 	}
 	printf("Sent 'high entropy data'\n");
 	printf("Ending Probing UDP phase\n");
+	
+	//freeing packets
 	free(low_entropy);
 	free(low);
 	free(high);
+
 	close(sockUDP);
 	
 	printf("starting post probe TCP\n");
@@ -319,8 +357,10 @@ int main(int argc, char *argv[]){
 	//creating TCP post probe socket
 	int postprobe_socket;
 
+	//set port to postTCp port
 	port = config.port_TCP;
 	serveraddr.sin_port= htons(port);
+	//create socket
 	if( (postprobe_socket = socket (AF_INET, SOCK_STREAM, 0))<0){
 		perror("COULD NOT CREATE POST PROBE PHASE SOCKET TCP");
 		exit(1);
@@ -343,6 +383,7 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	timed[n]='\0';
+	//printing out compression results from server
 	printf("Result : %s\n", timed);
 
 	printf("ENDING TCP POST PROBE CONNECTION\n");

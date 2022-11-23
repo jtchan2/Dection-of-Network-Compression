@@ -32,6 +32,7 @@ void alarm_handler(int sig){
 void alarm_handler2(int sig){
 	stop_loop_2= 1;
 }
+
 instructions cJSON_make_struct(char* file, instructions settings){
 	cJSON *json, *item;
 	json = cJSON_Parse(file);
@@ -100,14 +101,14 @@ exit(0);
 }
 int main (int argc, char *argv[]){
 	
-	// pre config file recieving from Server
+	// pre config file recieving from Server's config file
 	printf("Getting config file Information\n");
 	instructions config= read_file(argv[1]);
 	
 	
 	int preprobe_socket;
-	// item used to set dont fragment and reuse sock addr
-	int frag = IP_PMTUDISC_DO;
+	// item used to set  reuse sock addr
+	int flag = IP_PMTUDISC_DO;
 	
 	printf("Starting Pre Probing TCP phase\n");
 	
@@ -115,18 +116,19 @@ int main (int argc, char *argv[]){
 		perror("Unable to create pre probing Socket");
 		exit(1);
 	}
+	//set variables for use of pre probe tcp, port initialized and be used for all sockets descriptors
 	int port;
 	char * ip= config.server_ip;
 	struct sockaddr_in serveraddr;
 
-	//sets and allocate memory for TCP
+	//sets and allocate memory for TCP probe socket
 	port = config.port_TCP;
 	memset(&serveraddr, 0, sizeof(serveraddr));	
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port= htons(port);
 	serveraddr.sin_addr.s_addr= inet_addr(ip);
 
-	setsockopt(preprobe_socket, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
+	setsockopt(preprobe_socket, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
 	if( bind(preprobe_socket, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
 		perror("Unable to bind pre probing socket");
 		exit(1);
@@ -144,6 +146,8 @@ int main (int argc, char *argv[]){
 		perror("Unable to accept Pre probing SOcket");
 		exit(1);
 	}
+
+	//declared variables for TCP and UDP socket use
 	char destination_UDP[256];
 	char port_TCP[256];
 	char paySize [256];
@@ -151,6 +155,7 @@ int main (int argc, char *argv[]){
 	char time [256];
 	int n;
 
+	// receive COnfig file information from Server for Compression set up
 	if( (n = recv (ppclient_socket, destination_UDP, sizeof(destination_UDP), 0))<0){
 		perror("Unable to recieve message from Pre Probe socket");
 		exit(1);
@@ -167,7 +172,7 @@ int main (int argc, char *argv[]){
 	n=recv(ppclient_socket, time, sizeof(time),0);
 	time[n]='\0';
 
-	// converts received items into local variable
+	// converts received items into local variables to be used for packet receiving and post TCP connection
 	port = atoi(destination_UDP);
 	int size_payload = atoi(paySize);
 	char bytes[size_payload];
@@ -189,6 +194,7 @@ int main (int argc, char *argv[]){
 	memset(&serveraddrUDP, 0, sizeof(serveraddrUDP));
 	memset(&clientaddrUDP, 0, sizeof(clientaddrUDP));
 	
+	//Set socket info
 	serveraddrUDP.sin_family = AF_INET;
 	serveraddrUDP.sin_port= htons(port);
 	serveraddrUDP.sin_addr.s_addr=inet_addr(ip);
@@ -202,6 +208,7 @@ int main (int argc, char *argv[]){
 	
 	
 	printf("created UDP socket\n");
+	//bind udp sock to port
 	if ( bind(sockUDP, (const struct sockaddr *) &serveraddrUDP, sizeof(serveraddrUDP))< 0){
 		perror("Not able to bind UDP socket");
 		exit(1);
@@ -221,13 +228,15 @@ int main (int argc, char *argv[]){
         }
 
 	//Allow for reuse of port address
-        setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &frag, sizeof(frag));
+        setsockopt(post_sock, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag));
 
+	//bind post tcp sock to port
         if( bind(post_sock, (struct sockaddr*) &serveraddr, sizeof(serveraddr))<0){
                 perror("Unable to Bind Post probing TCP");
                 exit(1);
         }
 
+	//check if tcp post sock can lsiten for connections
 	int checkycheck;
         if((checkycheck=listen(post_sock, 5))<0){
                 perror("Not able to listen for Post Probing Phase TCP");
@@ -238,23 +247,20 @@ int main (int argc, char *argv[]){
 
 
 // UDP packet receiving  here 
-
+	//timer variables capturing low entropy data
 	clock_t timer_low_start, timer_low_end;
 	
 	int len= sizeof(clientaddrUDP);
-	//timer = clock();
-	//receiving packts
-	/*
-	for(int i=0; i<num_of_packets; i++){
+	//Receiving Low entropy packets
+	
 
-		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
-	}
-	*/
-	//New Recv method
+	//Variable to count number of packets
 	int counter = 0;
+
+	//method to receive lowe entropy data from client
 	while((counter < num_of_packets) && stop_loop ==0){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
-		if(counter == 0 && n >0){
+		if(counter == 0 && n >0){ //Start timer when first packet received
 			timer_low_start = clock();
 			alarm(5); // if not all packets are recv after 5 sec, stop waiting
 			signal(SIGALRM, alarm_handler);
@@ -275,20 +281,14 @@ int main (int argc, char *argv[]){
 	printf("\n");
 
 	printf("Now Recieve high entropy data packets'\n");
+	//timer variables to captureing high entropy data
 	clock_t timer_high_start, timer_high_end;
-	//timer2=clock();
-	/*
-	for(int i=0; i<num_of_packets; i++){
-		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
-		
-	}
-	*/
 	counter = 0;
 
-	//new high recv
+	//Receiving method for high entropy data
 	while((counter < num_of_packets) && stop_loop_2 == 0){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
-		if(counter ==0 && n> 0){ //start waiting period
+		if(counter ==0 && n> 0){ //start waiting period when first pak received
 			timer_high_start = clock();
 			alarm(5); // if packets are not all recv by 5 second stop waiting
 			signal(SIGALRM, alarm_handler2);
@@ -297,6 +297,8 @@ int main (int argc, char *argv[]){
 	}
 	
 	timer_high_end= clock();
+
+
 	// calculate time in seconds
 	double time_taken2= (((double)timer_high_end) - ((double)timer_high_start)) / ((double)CLOCKS_PER_SEC);
 	time_taken2= time_taken2 * 1000; //convert to ms
@@ -307,9 +309,10 @@ int main (int argc, char *argv[]){
 	printf("Probing UDP phase ending\n");
 	close(sockUDP);
 	
-	//Does math of finding time difference in seconds then converts to MS
+	//Does math of finding time difference in MS
 	double time_overall = time_taken2 - time_taken;
 
+	//writes results to char buffer called mille
 	char  *mille;
 	if(time_overall >((double)100)){
 		mille="Compression Detected!";
@@ -326,7 +329,7 @@ int main (int argc, char *argv[]){
 	//TCP post now accepting any incoming TCP connections
 	int client_sockPost;
 	
-		
+	//accept incoming connections
 	if((client_sockPost= accept(post_sock, (struct sockaddr*) &client_addr, &addr_size))<0){
 		perror("Not able to Accept for Post Probing pahse TCP");
 		exit(1);
@@ -342,6 +345,7 @@ int main (int argc, char *argv[]){
 	}
 	printf("Sent Client time results\n");
 	printf("ending post probing phase\n");
+	//close remaining used sockets
 	close(post_sock);
 	close(client_sockPost);
 	
