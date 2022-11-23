@@ -378,7 +378,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 	// Seetting Destination MAC addr
-	// This is Mac address of server wanted to send to 
+	// This is sets Mac address of server wanted to send to 
 	dst_mac[0] = 0x08;	
 	dst_mac[1] = 0x00;	
 	dst_mac[2] = 0x27;	
