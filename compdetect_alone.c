@@ -25,7 +25,7 @@
 
 #define IP4_HDRLEN 20  // IPv4 header legnth
 #define TCP_HDRLEN 20 // TCP header lenght, does not include data
-
+#define MAX_PAYLOAD_SIZE 2000
 
 
 
@@ -307,6 +307,12 @@ int main(int argc, char *argv[]){
 	struct udpPacket{
 		int length;
 		char bytes[payload];
+	};
+
+	struct packet{
+		char byte_0_id;
+		char byte_1_id;
+		char data_payload[MAX_PAYLOAD_SIZE];
 	};
 
 	//Creating TCP SYN packets
@@ -642,8 +648,20 @@ int main(int argc, char *argv[]){
 
 	// now sending low packets
 	printf("now sending low packets\n");
-	for(int i =0; i< number_of_packets; i++){
-		sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+	char buffer [3000];
+
+	struct packet *low = (struct packet *) malloc(sizeof(struct packet));
+	memset(&low->data_payload, 0, MAX_PAYLOAD_SIZE);
+
+
+	for(unsigned short int i =0; i< number_of_packets; i++){
+		low->byte_0_id= (uint8_t)(i & 0xff);
+		low->byte_1_id= (uint8_t)(i >> 8);
+		
+		memcpy(buffer, (char *) low, sizeof(struct packet));
+		
+		sendto(sockUDP, buffer, (payload + 2), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+		//sendto(sockUDP, low_entropy[i].bytes, sizeof(low_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
 	}
 	printf("Lows packets Sent\n");
 
@@ -785,9 +803,23 @@ int main(int argc, char *argv[]){
 
 	printf("Now sending high data\n");
 
+	struct packet * high= (struct packet *) malloc(sizeof(struct packet));
+
+	char rngRandomData2[MAX_PAYLOAD_SIZE];
+	unsigned int rngData2 = open("rng", O_RDONLY);
+	read(rngData2, rngRandomData2, payload);
+	close(rngData2);
+
+	memcpy(&high->data_payload, &rngRandomData2, MAX_PAYLOAD_SIZE);
 
 	for(int i=0; i< number_of_packets; i++){
-		sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+		high->byte_0_id = (uint8_t)(i & 0xff);
+		high->byte_1_id = (uint8_t)(i >> 8);
+		
+		memcpy(buffer, (char *) high, sizeof(struct packet));
+
+		sendto(sockUDP, buffer, (payload +2), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
+		//sendto(sockUDP, high_entropy[i].bytes, sizeof(high_entropy[i].bytes), MSG_CONFIRM, (const struct sockaddr *) &serveraddr, sizeof(serveraddr));
 	}
 
 	printf("High packet sent\n");
