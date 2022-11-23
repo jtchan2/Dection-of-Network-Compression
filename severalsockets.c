@@ -337,6 +337,7 @@ int main(int argc, char *argv[]){
 	char timed[256];
 	int n;
 	//receiving comp dect message from server
+	printf("Receiving Compression Result from Server\n");
 	if( (n=recv(postprobe_socket,&timed, sizeof(timed), 0)) <0){
 		perror("unable to Recieve message from Post Phase TCP");
 		exit(1);

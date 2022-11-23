@@ -166,7 +166,6 @@ int main (int argc, char *argv[]){
 	numOfPaks[n]='\0';
 	n=recv(ppclient_socket, time, sizeof(time),0);
 	time[n]='\0';
-	printf("time: %s\n",time);
 
 	// converts received items into local variable
 	port = atoi(destination_UDP);
@@ -252,8 +251,8 @@ int main (int argc, char *argv[]){
 	}
 	*/
 	//New Recv method
-	int counter =1 ;
-	while(counter < num_of_packets && stop_loop ==0){
+	int counter = 0;
+	while((counter < num_of_packets) && stop_loop ==0){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
 		if(counter == 0 && n >0){
 			timer_low_start = clock();
@@ -266,9 +265,7 @@ int main (int argc, char *argv[]){
 
 	//calculate time in seconds
 	double time_taken = (((double)timer_low_end) - ((double) timer_low_start)) / ((double) CLOCKS_PER_SEC);
-	printf("Low time : %lf sec\n", time_taken);
 	time_taken = time_taken*1000; //convert to ms
-	printf("Low time : %lf ms \n", time_taken);
 	
 
 	printf("recieved Low Entropy packets\n");
@@ -289,7 +286,7 @@ int main (int argc, char *argv[]){
 	counter = 0;
 
 	//new high recv
-	while(counter < num_of_packets && stop_loop_2 == 0){
+	while((counter < num_of_packets) && stop_loop_2 == 0){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
 		if(counter ==0 && n> 0){ //start waiting period
 			timer_high_start = clock();
@@ -302,9 +299,8 @@ int main (int argc, char *argv[]){
 	timer_high_end= clock();
 	// calculate time in seconds
 	double time_taken2= (((double)timer_high_end) - ((double)timer_high_start)) / ((double)CLOCKS_PER_SEC);
-	printf("high time : %lf sec\n", time_taken2);
 	time_taken2= time_taken2 * 1000; //convert to ms
-	printf("high time : %lf ms \n", time_taken2);
+	
 	
 	printf("recieved High entropy packts\n");
 
@@ -313,7 +309,7 @@ int main (int argc, char *argv[]){
 	
 	//Does math of finding time difference in seconds then converts to MS
 	double time_overall = time_taken2 - time_taken;
-	printf("Time calc is : %lf\n", time_overall);
+
 	char  *mille;
 	if(time_overall >((double)100)){
 		mille="Compression Detected!";
@@ -336,9 +332,6 @@ int main (int argc, char *argv[]){
 		exit(1);
 	}
 
-	if(client_sockPost>0){
-		printf("Accepted\n");
-	}
 	
 	//sending results of packet receiving to Client
 	int bytez;
