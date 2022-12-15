@@ -152,12 +152,6 @@ int main(int argc, char *argv[]){
 	int size_payload=config.payload_size; // size of packet payloads
 	int pause=config.measure_time; // used for making packet sending to have a break
 
-	//Old Structure of UDP packet sending, connected to code surrouned
-	// by hyphens
-	struct packet{
-		int length;
-		char bytes[size_payload];
-	};
 	//Correct packet struct used for UDP packet sending
 	struct pak{
 		char byte_0_id; //lower order byte id
@@ -246,57 +240,10 @@ int main(int argc, char *argv[]){
 		perror("Unable to Bind UDP socket");
 		exit(1);
 	}
-
-
-	/* Old packet creating phase down, section is seperated by '-'
-	 * If this code section is removed for some reason it causes whole
-	 * code to break. Unable to determine issue why it is being caused.
-	 * Additionally, none of its creation is used anywhere except for
-	 * filling up a pointer, it is not sent but some form of impact 
-	 * on overall code.
-	 */
-	//--------------------------------------------
-	
-	//old way had a packet pointer that storesa packet array of each size
-	//being the wanted size received from serve
-	struct packet *low_entropy = (struct packet *) malloc (num_of_packets * sizeof(struct packet));
-
-	//car to be sued for id keeping
-	unsigned short id=0;
-	//for loop to set low entropy data to 0
-	for(int i=0; i<num_of_packets; i++){
-		low_entropy[i].length= size_payload;
-		//set payload mem = 0
-		for( int j=0; j< (size_payload -2); j++){
-			low_entropy[i].bytes[j]=0;
-		}
-
-		// sets id of packet by "bitshifting" incorrectly
-		char packid[2];
-		packid[0]=id%256;
-		packid[1]=id/256;
-		id++;
-		
-		//create a paylaod buffer fo specific byte length to be sent
-		char * payload = (char *) malloc(strlen(low_entropy[i].bytes)+ strlen(packid)+1);
-
-		//copy packet id to paylaod buffer
-		strcpy(payload, packid);
-		//concatinate payload bytes to buffer payload 
-		strcat(payload, low_entropy[i].bytes);
-		//copy payload buffer into pointer payload
-		strcpy(low_entropy[i].bytes, payload);
-		
-	}
-	/* Again above code/ code in between commented hyphens is old way
-	 * of making low entropy UDP packets. It is not used anywhere except
-	 * here. If it is removed from code it causes the whole code to break
-	 * and not send data correctly. THe correct udp code making is done in
-	 * for loop at forloop of sending packets
-	 */
 	//-------------------------------------------------------------
 
-
+	sleep(5); //sleep used to make sure server and client are "sync"
+		  //correctly for packet sendign and receiving
 	printf("Now Sending Low entropy data packets\n");
 
 	//creation of low packet data
@@ -346,7 +293,7 @@ int main(int argc, char *argv[]){
 	printf("Ending Probing UDP phase\n");
 	
 	//freeing packets
-	free(low_entropy);
+	//free(low_entropy);
 	free(low);
 	free(high);
 

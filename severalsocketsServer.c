@@ -23,16 +23,6 @@ typedef struct{
 	int port_TCP;
 }instructions;
 
-//handle time out while waiting low entopy data
-void alarm_handler(int sig){
-	stop_loop = 1;
-}
-
-//handle time out while waiting for high entropy data
-void alarm_handler2(int sig){
-	stop_loop_2= 1;
-}
-
 instructions cJSON_make_struct(char* file, instructions settings){
 	cJSON *json, *item;
 	json = cJSON_Parse(file);
@@ -262,8 +252,6 @@ int main (int argc, char *argv[]){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) &clientaddrUDP,&len);
 		if(counter == 0 && n >0){ //Start timer when first packet received
 			timer_low_start = clock();
-			alarm(5); // if not all packets are recv after 5 sec, stop waiting
-			signal(SIGALRM, alarm_handler);
 		}
 		counter++;
 	}
@@ -290,8 +278,6 @@ int main (int argc, char *argv[]){
 		n = recvfrom(sockUDP, bytes, sizeof(bytes), MSG_WAITALL, (struct sockaddr *) & clientaddrUDP, &len);
 		if(counter ==0 && n> 0){ //start waiting period when first pak received
 			timer_high_start = clock();
-			alarm(5); // if packets are not all recv by 5 second stop waiting
-			signal(SIGALRM, alarm_handler2);
 		}
 		counter++;
 	}

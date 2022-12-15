@@ -303,12 +303,7 @@ int main(int argc, char *argv[]){
 	int number_of_packets= config.num_of_paks;
 	int timeToLive= config.timeTL;
 
-
-	struct udpPacket{
-		int length;
-		char bytes[payload];
-	};
-
+	//packet struct for packet sending
 	struct packet{
 		char byte_0_id;
 		char byte_1_id;
@@ -389,10 +384,8 @@ int main(int argc, char *argv[]){
 	
 	//Source ipv4 addr
 	strcpy(src_ip, config.client_ip);
-	printf("client addr: %s\n", config.client_ip);
 	//Destiantion Ipv4 addr
 	strcpy(target, config.server_ip);
-	printf("server addr: %s\n", config.server_ip);
 	// fill out hints for getaddrinfo()
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_INET;
@@ -608,7 +601,7 @@ int main(int argc, char *argv[]){
 	}
 
 	// now sending low packets
-	printf("now sending low packets\n");
+	printf("now sending low entropy packets\n");
 	
 	char buffer [3000]; // char buffer to send packets through
 	
@@ -768,7 +761,7 @@ int main(int argc, char *argv[]){
 	close(sockRaw);
 
 
-	printf("Now sending high data\n");
+	printf("Now sending high entropy data\n");
 
 	//now creating high entropy packet pointer
 	struct packet * high= (struct packet *) malloc(sizeof(struct packet));
